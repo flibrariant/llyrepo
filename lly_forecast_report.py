@@ -222,14 +222,7 @@ band_95 = np.percentile(paths[:, 1:], 95, axis=0)
 
 fig1 = go.Figure()
 
-# 過去株価
-fig1.add_trace(go.Scatter(
-    x=dates_hist, y=close,
-    name='実績株価', line=dict(color='#ffffff', width=2.5),
-    hovertemplate='$%{y:.2f}<extra></extra>'
-))
-
-# SMA
+# SMA（先に描いて背面に）
 fig1.add_trace(go.Scatter(x=sma50.index, y=sma50,
     name='SMA50', line=dict(color='#ff9944', width=1.2, dash='dash'), opacity=0.7))
 fig1.add_trace(go.Scatter(x=sma200.index, y=sma200,
@@ -281,6 +274,13 @@ for sp in supports[-3:]:
     fig1.add_hline(y=sp, line=dict(color='rgba(0,255,136,0.3)', width=0.8, dash='dash'))
 for rs in resistances[:3]:
     fig1.add_hline(y=rs, line=dict(color='rgba(255,100,100,0.3)', width=0.8, dash='dash'))
+
+# 実績株価（最前面に描く）
+fig1.add_trace(go.Scatter(
+    x=dates_hist, y=close,
+    name='実績株価', line=dict(color='#00ffff', width=3),
+    hovertemplate='$%{y:.2f}<extra></extra>'
+))
 
 fig1.update_layout(
     title=dict(text='LLY 株価チャート + 1年予測（モンテカルロ）', font=dict(color='white', size=16)),
