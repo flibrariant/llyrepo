@@ -277,7 +277,7 @@ fig2 = make_subplots(
     row_heights=[0.72, 0.28],
     vertical_spacing=0.06,
     subplot_titles=(f'PER ボリンジャーバンド（{bb_win}日移動平均, ±2σ）',
-                    '%B（BBバンド内の位置）')
+                    '%B（BBバンド内の位置） ／ 赤背景＝SMA200下（買いシグナル無効）')
 )
 
 # バンド塗りつぶし（上限→下限の間を塗る）
@@ -337,6 +337,37 @@ fig2.add_hrect(y0=-0.2, y1=0.2, fillcolor='rgba(68,255,136,0.08)',
                line_width=0, row=2, col=1,
                annotation_text='割安', annotation_font_color='#44ff88',
                annotation_position='right')
+
+# SMA200フィルター：価格がSMA200を下回る期間を赤背景で表示
+sma200_aligned = sma200.reindex(per_plot.index, method='ffill')
+close_aligned  = close.reindex(per_plot.index, method='ffill')
+above_sma200   = close_aligned > sma200_aligned
+
+in_below  = False
+seg_start = None
+for date, above in above_sma200.items():
+    if not above and not in_below:
+        in_below  = True
+        seg_start = date
+    elif above and in_below:
+        in_below = False
+        fig2.add_vrect(x0=seg_start, x1=date,
+                       fillcolor='rgba(255,68,68,0.12)', line_width=0,
+                       row=2, col=1)
+if in_below:
+    fig2.add_vrect(x0=seg_start, x1=per_plot.index[-1],
+                   fillcolor='rgba(255,68,68,0.12)', line_width=0,
+                   row=2, col=1)
+
+# SMA200条件のダミートレース（凡例用）
+above_now = bool(close.iloc[-1] > sma200.iloc[-1])
+fig2.add_trace(go.Scatter(
+    x=[None], y=[None],
+    mode='markers',
+    marker=dict(color='rgba(255,68,68,0.5)', size=10, symbol='square'),
+    name=f'SMA200下（買い無効） 現在:{"上✓" if above_now else "下✗"}',
+    showlegend=True
+), row=2, col=1)
 
 # Y軸を明示的に設定
 per_y_min = max(0, per_plot[['per', 'lower']].min().min() * 0.90)
