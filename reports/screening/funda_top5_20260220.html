@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ファンダメンタルズ分析 TOP5 ─ 2026/02/20</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0f1a;color:#c8d8f0;font-family:'Segoe UI',Meiryo,sans-serif;font-size:14px;line-height:1.5}
+.header{background:linear-gradient(135deg,#0a1230,#162050);padding:22px 30px;border-bottom:2px solid #1e3060}
+.header h1{font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:.5px}
+.header p{color:#7090c0;font-size:.85rem;margin-top:6px}
+.nav{display:flex;gap:10px;padding:12px 24px;background:#0a0c18;border-bottom:1px solid #1a2040;overflow-x:auto}
+.nav a{color:#7090c0;font-size:.78rem;padding:4px 10px;border-radius:4px;border:1px solid #1e2a4a;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:#162050;color:#90b8f0}
+
+/* セクションタイトル */
+.sec-title{font-size:.78rem;color:#4060a0;text-transform:uppercase;letter-spacing:1px;padding:18px 24px 6px;font-weight:700}
+
+/* 比較テーブル */
+.tbl-wrap{margin:0 20px 20px;border-radius:8px;overflow:auto;border:1px solid #1e2a44}
+table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:900px}
+thead tr{background:#0d1535}
+th{padding:9px 10px;text-align:right;color:#6080b0;font-weight:600;white-space:nowrap;position:sticky;top:0;background:#0d1535;z-index:1}
+th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid #141c36}
+tbody tr:hover{background:#131b38}
+td{padding:7px 10px;white-space:nowrap}
+.sticky-col{position:sticky;left:0;background:#0d0f1a;z-index:1;min-width:120px}
+.tr{text-align:right}.tc{text-align:center}
+.g2{color:#26c6a0;font-weight:600}.y2{color:#ffd54f}.na{color:#333;font-style:italic}
+.code-tag{font-family:monospace;font-size:.8rem;color:#5080c0}
+.cname{font-size:.88rem;font-weight:600;color:#c0d0f0}
+
+/* バッジ */
+.vbadge{border-radius:4px;padding:3px 8px;font-size:.72rem;font-weight:700;display:inline-block}
+.v-strong-buy{background:rgba(38,198,160,0.2);color:#26c6a0;border:1px solid #26c6a0}
+.v-buy{background:rgba(90,180,255,0.15);color:#5ab4ff;border:1px solid #4090e0}
+.v-watch{background:rgba(255,213,79,0.12);color:#ffd54f;border:1px solid #c0a020}
+
+/* 企業セクション */
+.company-section{margin:0 20px 28px;border-radius:10px;border:1px solid #1e2a44;overflow:hidden;background:#0d0f1e}
+.cs-header{display:flex;align-items:center;gap:16px;padding:16px 20px;background:#0a1228;border-bottom:1px solid #1e2a44}
+.cs-rank{font-size:2rem;font-weight:900;color:#2a3a6a;min-width:44px}
+.cs-info{flex:1}
+.cs-code{font-family:monospace;font-size:.9rem;color:#4070b0}
+.cs-name{font-size:1.1rem;font-weight:700;color:#e0ecff}
+.cs-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.cs-price{font-size:1.3rem;font-weight:700;color:#fff}
+.cs-cap{font-size:.75rem;color:#4060a0}
+.cs-target{background:#101828;border:1px solid #1e3050;border-radius:6px;padding:6px 14px;font-size:.8rem;color:#80a8d8;white-space:nowrap}
+
+/* ビジネス概要 */
+.cs-biz{padding:12px 20px;border-bottom:1px solid #141c30;background:#0c1020}
+.biz-label{font-size:.68rem;color:#3a5090;text-transform:uppercase;font-weight:700;margin-bottom:4px;letter-spacing:.5px}
+.biz-text{font-size:.83rem;color:#8090b0;line-height:1.7}
+
+/* 財務グリッド */
+.fin-grid{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px;border-bottom:1px solid #141c30;background:#0b0f1c}
+.fc{background:#111828;border:1px solid #1a2440;border-radius:6px;padding:8px 12px;min-width:100px}
+.fc-label{font-size:.63rem;color:#3a5090;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.fc-val{font-size:.95rem;font-weight:700}
+.good-v{color:#26c6a0}.mid-v{color:#90a8d0}.bad-v{color:#ef5350}
+
+/* 52週レンジバー */
+.range-bar-wrap{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid #141c30;background:#0b0f1c;flex-wrap:wrap}
+.range-lo,.range-hi{font-size:.78rem;color:#4a6090;white-space:nowrap}
+.range-bar-outer{flex:1;height:8px;background:#1a2440;border-radius:4px;position:relative;min-width:100px}
+.range-bar-inner{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;transform:translateX(-50%);border:2px solid #0d0f1a}
+.range-bar-fill{position:absolute;top:0;left:0;height:8px;border-radius:4px}
+.range-info{font-size:.75rem;color:#4a6090;width:100%}
+
+/* チャートエリア */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #141c30}
+.chart-box{padding:8px}
+@media(max-width:700px){.charts-row{grid-template-columns:1fr}}
+
+/* SWOT */
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.swot-card{padding:14px 18px;border-top:1px solid #141c30}
+.swot-card:nth-child(odd){border-right:1px solid #141c30}
+.swot-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.sw .swot-title{color:#26c6a0}.wk .swot-title{color:#ffd54f}
+.ca .swot-title{color:#5ab4ff}.ri .swot-title{color:#ef8f8f}
+.swot-card ul{margin-left:14px}
+.swot-card li{font-size:.8rem;color:#7090b0;line-height:1.7;margin-bottom:2px}
+@media(max-width:700px){.swot-grid{grid-template-columns:1fr}.swot-card:nth-child(odd){border-right:none}}
+
+footer{text-align:center;padding:16px;color:#1e2a44;font-size:.73rem;border-top:1px solid #141c30;margin-top:20px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ファンダメンタルズ分析レポート ─ DOEスクリーニング TOP5</h1>
+  <p>2026年2月20日　｜　DOE 2%以上×時価総額500億未満 スクリーニング 上位5社の詳細財務分析</p>
+</div>
+
+<nav class="nav">
+  <a href="#compare">▌ 比較サマリー</a>
+  <a href="#c9441">#1 ベルパーク</a><a href="#c9908">#2 日本電計</a><a href="#c8101">#3 G.S.I.クレオス</a><a href="#c3333">#4 あさひ</a><a href="#c256A">#5 鳥島ホールディングス</a>
+</nav>
+
+<p class="sec-title" id="compare">▌ 5社 比較サマリー</p>
+<div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>企業</th><th>株価</th><th>時価総額</th>
+        <th>DOE↑</th><th>PSR↓</th><th>PBR↓</th><th>PER↓</th>
+        <th>配当利回↑</th><th>ROE↑</th><th>自己資本比率↑</th><th>有利子負債</th>
+        <th>目標上昇率</th><th>判定</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="sticky-col"><span class="code-tag">9441</span><br><span class="cname">ベルパーク</span></td>
+      <td class="tr">2,595.0円</td>
+      <td class="tr">317.6億</td>
+      <td class="tr g2">4.62%</td>
+      <td class="tr g2">0.25</td>
+      <td class="tr y2">1.17</td>
+      <td class="tr y2">13.3倍</td>
+      <td class="tr g2">395.0%</td>
+      <td class="tr g2">13.51%</td>
+      <td class="tr g2">67.4%</td>
+      <td class="tr y2">0.7億</td>
+      <td class="tr">+15〜25%（3ヶ月）</td>
+      <td class="tc"><span class="vbadge v-strong-buy">最強推奨</span></td>
+    </tr>
+    <tr>
+      <td class="sticky-col"><span class="code-tag">9908</span><br><span class="cname">日本電計</span></td>
+      <td class="tr">2,570.0円</td>
+      <td class="tr">290.5億</td>
+      <td class="tr g2">3.31%</td>
+      <td class="tr g2">0.22</td>
+      <td class="tr g2">0.95</td>
+      <td class="tr g2">9.8倍</td>
+      <td class="tr g2">345.0%</td>
+      <td class="tr g2">10.93%</td>
+      <td class="tr y2">40.3%</td>
+      <td class="tr y2">152.2億</td>
+      <td class="tr">+12〜18%（3ヶ月）</td>
+      <td class="tc"><span class="vbadge v-strong-buy">強い買い</span></td>
+    </tr>
+    <tr>
+      <td class="sticky-col"><span class="code-tag">8101</span><br><span class="cname">G.S.I.クレオス</span></td>
+      <td class="tr">2,715.0円</td>
+      <td class="tr">333.4億</td>
+      <td class="tr g2">3.97%</td>
+      <td class="tr g2">0.19</td>
+      <td class="tr y2">1.06</td>
+      <td class="tr y2">13.5倍</td>
+      <td class="tr g2">373.0%</td>
+      <td class="tr y2">8.79%</td>
+      <td class="tr y2">37.6%</td>
+      <td class="tr y2">134.8億</td>
+      <td class="tr">+10〜15%（3ヶ月）</td>
+      <td class="tc"><span class="vbadge v-buy">買い</span></td>
+    </tr>
+    <tr>
+      <td class="sticky-col"><span class="code-tag">3333</span><br><span class="cname">あさひ</span></td>
+      <td class="tr">1,287.0円</td>
+      <td class="tr">335.2億</td>
+      <td class="tr g2">3.19%</td>
+      <td class="tr g2">0.41</td>
+      <td class="tr g2">0.82</td>
+      <td class="tr g2">11.5倍</td>
+      <td class="tr g2">385.0%</td>
+      <td class="tr y2">6.75%</td>
+      <td class="tr g2">71.8%</td>
+      <td class="tr g2">0</td>
+      <td class="tr">+8〜12%（3ヶ月）</td>
+      <td class="tc"><span class="vbadge v-buy">買い</span></td>
+    </tr>
+    <tr>
+      <td class="sticky-col"><span class="code-tag">256A</span><br><span class="cname">鳥島ホールディングス</span></td>
+      <td class="tr">2,509.0円</td>
+      <td class="tr">480.6億</td>
+      <td class="tr g2">3.63%</td>
+      <td class="tr g2">0.35</td>
+      <td class="tr g2">0.91</td>
+      <td class="tr y2">12.9倍</td>
+      <td class="tr g2">393.0%</td>
+      <td class="tr y2">9.45%</td>
+      <td class="tr y2">32.0%</td>
+      <td class="tr y2">364.1億</td>
+      <td class="tr">+5〜10%（3ヶ月、不確実性高）</td>
+      <td class="tc"><span class="vbadge v-watch">様子見</span></td>
+    </tr></tbody>
+  </table>
+</div>
+
+
+  <section class="company-section" id="c9441">
+    <div class="cs-header" style="border-left:4px solid #ffd54f">
+      <div class="cs-rank">#1</div>
+      <div class="cs-info">
+        <div class="cs-code">9441</div>
+        <div class="cs-name">ベルパーク</div>
+      </div>
+      <div class="cs-meta">
+        <div class="cs-price">¥2,595.0</div>
+        <div class="cs-cap">317.6億円</div>
+        <div class="vbadge v-strong-buy">★★★★★&nbsp;最強推奨</div>
+      </div>
+      <div class="cs-target">目標：+15〜25%（3ヶ月）</div>
+    </div>
+
+    <!-- ビジネス概要 -->
+    <div class="cs-biz">
+      <div class="biz-label">ビジネスモデル</div>
+      <div class="biz-text">ソフトバンク系携帯電話代理店（ショップ運営）最大手クラス。全国にSoftBankショップを展開し、端末販売・料金プラン契約・スマートデバイス法人提案を行う。近年はネット回線・保険等のクロスセルも強化。</div>
+    </div>
+
+    <!-- 財務サマリー -->
+    <div class="fin-grid">
+    <div class="fc">
+      <div class="fc-label">ROE</div>
+      <div class="fc-val good-v">13.51%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">ROA</div>
+      <div class="fc-val good-v">7.8%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">粗利率</div>
+      <div class="fc-val mid-v">24.12%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">営業利益率</div>
+      <div class="fc-val mid-v">4.18%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">純利益率</div>
+      <div class="fc-val mid-v">3.19%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">配当性向</div>
+      <div class="fc-val mid-v">33.39%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">自己資本比率</div>
+      <div class="fc-val good-v">67.4%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">流動比率</div>
+      <div class="fc-val good-v">2.2</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">FCF（直近期）</div>
+      <div class="fc-val good-v">3,299百万</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">EPS</div>
+      <div class="fc-val mid-v">195円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">BPS</div>
+      <div class="fc-val mid-v">2209円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">DPS</div>
+      <div class="fc-val good-v">102.0円</div>
+    </div></div>
+
+    <!-- 52週レンジ -->
+    <div class="range-bar-wrap">
+      <span class="range-lo">安値 1,427.0</span>
+      <div class="range-bar-outer">
+        <div class="range-bar-inner" style="left:73%;background:#ffd54f"></div>
+        <div class="range-bar-fill" style="width:73%;background:#ffd54f22"></div>
+      </div>
+      <span class="range-hi">高値 3,035.0</span>
+      <span class="range-info">現値 2,595.0　|　安値比+81.9%　高値比-14.5%　|　MA50:📉 下　MA200:📈 上</span>
+    </div>
+
+    <!-- チャートエリア -->
+    <div class="charts-row">
+      <div class="chart-box"><div id="pl_9441"></div></div>
+      <div class="chart-box"><div id="div_9441"></div></div>
+    </div>
+
+    <!-- 強み・弱み・カタリスト・リスク -->
+    <div class="swot-grid">
+      <div class="swot-card sw">
+        <div class="swot-title">💪 強み・ポジティブ</div>
+        <ul><li>自己資本比率 67.4%・有利子負債ゼロ（無借金経営）で財務鉄板</li><li>ROE 13.5%は5社中最高（無借金でこの収益性は優秀）</li><li>DOE 4.62%は全スクリーニング銘柄中最高（配当方針が最も積極的）</li><li>直近DPS：43→43→50→102円と段階的大幅増配（前期比+104%）</li><li>安定的なFCF（2024年48.8億、2025年33億）で増配の持続性担保</li></ul>
+      </div>
+      <div class="swot-card wk">
+        <div class="swot-title">⚠️ 弱み・課題</div>
+        <ul><li>ソフトバンク依存度が高く、代理店政策変更リスクあり</li><li>実店舗型ビジネスでオンライン化の逆風（キャリアのダイレクト販売強化）</li><li>売上は横ばい（1,160億）で成長ドライバーが見えにくい</li></ul>
+      </div>
+      <div class="swot-card ca">
+        <div class="swot-title">🚀 カタリスト（1〜3ヶ月）</div>
+        <ul><li>2025/12期（2月末発表見込み）の本決算で更なる増配発表期待</li><li>ソフトバンクの法人DXサービス強化でショップの付加価値アップ</li><li>通信業界再編・M&Aプレミアム期待（代理店の統廃合）</li><li>インターネット回線・スマートホーム等のクロスセル拡大で単価向上</li></ul>
+      </div>
+      <div class="swot-card ri">
+        <div class="swot-title">🔴 リスク要因</div>
+        <ul><li>5G/6G普及に伴うキャリアショップ削減</li><li>MVNOへの乗り換え加速</li><li>SoftBank業績悪化によるインセンティブ変更</li></ul>
+      </div>
+    </div>
+  </section>
+  <section class="company-section" id="c9908">
+    <div class="cs-header" style="border-left:4px solid #26c6a0">
+      <div class="cs-rank">#2</div>
+      <div class="cs-info">
+        <div class="cs-code">9908</div>
+        <div class="cs-name">日本電計</div>
+      </div>
+      <div class="cs-meta">
+        <div class="cs-price">¥2,570.0</div>
+        <div class="cs-cap">290.5億円</div>
+        <div class="vbadge v-strong-buy">★★★★&nbsp;強い買い</div>
+      </div>
+      <div class="cs-target">目標：+12〜18%（3ヶ月）</div>
+    </div>
+
+    <!-- ビジネス概要 -->
+    <div class="cs-biz">
+      <div class="biz-label">ビジネスモデル</div>
+      <div class="biz-text">工場・プラント向け電気機器（計測機器・制御機器・電源装置等）の専門商社。関西電力グループ・大手製造業を主要顧客とする。電気機器の調達・設計提案・保守サービスまで一貫支援。</div>
+    </div>
+
+    <!-- 財務サマリー -->
+    <div class="fin-grid">
+    <div class="fc">
+      <div class="fc-label">ROE</div>
+      <div class="fc-val good-v">10.93%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">ROA</div>
+      <div class="fc-val mid-v">4.71%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">粗利率</div>
+      <div class="fc-val mid-v">13.82%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">営業利益率</div>
+      <div class="fc-val mid-v">4.93%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">純利益率</div>
+      <div class="fc-val mid-v">2.51%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">配当性向</div>
+      <div class="fc-val mid-v">34.47%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">自己資本比率</div>
+      <div class="fc-val mid-v">40.3%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">流動比率</div>
+      <div class="fc-val mid-v">1.77</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">FCF（直近期）</div>
+      <div class="fc-val bad-v">-98百万</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">EPS</div>
+      <div class="fc-val mid-v">261円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">BPS</div>
+      <div class="fc-val mid-v">2715円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">DPS</div>
+      <div class="fc-val good-v">90.0円</div>
+    </div></div>
+
+    <!-- 52週レンジ -->
+    <div class="range-bar-wrap">
+      <span class="range-lo">安値 1,612.0</span>
+      <div class="range-bar-outer">
+        <div class="range-bar-inner" style="left:87%;background:#26c6a0"></div>
+        <div class="range-bar-fill" style="width:87%;background:#26c6a022"></div>
+      </div>
+      <span class="range-hi">高値 2,712.0</span>
+      <span class="range-info">現値 2,570.0　|　安値比+59.4%　高値比-5.2%　|　MA50:📈 上　MA200:📈 上</span>
+    </div>
+
+    <!-- チャートエリア -->
+    <div class="charts-row">
+      <div class="chart-box"><div id="pl_9908"></div></div>
+      <div class="chart-box"><div id="div_9908"></div></div>
+    </div>
+
+    <!-- 強み・弱み・カタリスト・リスク -->
+    <div class="swot-grid">
+      <div class="swot-card sw">
+        <div class="swot-title">💪 強み・ポジティブ</div>
+        <ul><li>売上高4年で+32%（918億→1,212億）と一貫した成長トレンド</li><li>PSR 0.22は全銘柄中最低水準（売上規模に対して圧倒的に割安）</li><li>配当DPS：80→85→90円と着実増配、支払い継続の意志明確</li><li>営業利益率が2.3%→3.9%に改善中（スケールメリット享受）</li></ul>
+      </div>
+      <div class="swot-card wk">
+        <div class="swot-title">⚠️ 弱み・課題</div>
+        <ul><li>商社ゆえ粗利率13.8%と低く、外部環境変化に収益が左右されやすい</li><li>有利子負債152億（自己資本比率40%）でやや財務レバレッジあり</li><li>2025/3期のFCFが一時的にマイナス（売掛金増加による運転資金増）</li></ul>
+      </div>
+      <div class="swot-card ca">
+        <div class="swot-title">🚀 カタリスト（1〜3ヶ月）</div>
+        <ul><li>製造業の設備更新・省エネ投資需要の拡大（2026年度）</li><li>5月発表の2026/3期本決算での増配発表期待（ペイアウト比率34.5%から引き上げ余地大）</li><li>半導体・EV・エネルギー分野の工場新増設投資でFA機器・制御機器需要増</li><li>アナリストカバレッジ拡大による機関投資家の組み入れ</li></ul>
+      </div>
+      <div class="swot-card ri">
+        <div class="swot-title">🔴 リスク要因</div>
+        <ul><li>大手製造業の設備投資抑制</li><li>円高進行で輸入部品コスト改善が逆方向に</li><li>メーカー直販強化による商社マージン圧迫</li></ul>
+      </div>
+    </div>
+  </section>
+  <section class="company-section" id="c8101">
+    <div class="cs-header" style="border-left:4px solid #5ab4ff">
+      <div class="cs-rank">#3</div>
+      <div class="cs-info">
+        <div class="cs-code">8101</div>
+        <div class="cs-name">G.S.I.クレオス</div>
+      </div>
+      <div class="cs-meta">
+        <div class="cs-price">¥2,715.0</div>
+        <div class="cs-cap">333.4億円</div>
+        <div class="vbadge v-buy">★★★★&nbsp;買い</div>
+      </div>
+      <div class="cs-target">目標：+10〜15%（3ヶ月）</div>
+    </div>
+
+    <!-- ビジネス概要 -->
+    <div class="cs-biz">
+      <div class="biz-label">ビジネスモデル</div>
+      <div class="biz-text">繊維・化学品・産業資材を扱う中堅専門商社（旧・GS Yuasa系列）。アパレル向け繊維、産業用化学品、フィルム・包装材などを国内外で取り扱う。海外比率も高まりつつある。</div>
+    </div>
+
+    <!-- 財務サマリー -->
+    <div class="fin-grid">
+    <div class="fc">
+      <div class="fc-label">ROE</div>
+      <div class="fc-val mid-v">8.79%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">ROA</div>
+      <div class="fc-val mid-v">2.37%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">粗利率</div>
+      <div class="fc-val mid-v">10.1%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">営業利益率</div>
+      <div class="fc-val mid-v">2.14%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">純利益率</div>
+      <div class="fc-val mid-v">1.5%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">配当性向</div>
+      <div class="fc-val mid-v">48.24%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">自己資本比率</div>
+      <div class="fc-val mid-v">37.6%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">流動比率</div>
+      <div class="fc-val mid-v">1.47</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">FCF（直近期）</div>
+      <div class="fc-val good-v">2,663百万</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">EPS</div>
+      <div class="fc-val mid-v">201円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">BPS</div>
+      <div class="fc-val mid-v">2568円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">DPS</div>
+      <div class="fc-val good-v">102.0円</div>
+    </div></div>
+
+    <!-- 52週レンジ -->
+    <div class="range-bar-wrap">
+      <span class="range-lo">安値 1,631.0</span>
+      <div class="range-bar-outer">
+        <div class="range-bar-inner" style="left:96%;background:#5ab4ff"></div>
+        <div class="range-bar-fill" style="width:96%;background:#5ab4ff22"></div>
+      </div>
+      <span class="range-hi">高値 2,766.0</span>
+      <span class="range-info">現値 2,715.0　|　安値比+66.5%　高値比-1.8%　|　MA50:📈 上　MA200:📈 上</span>
+    </div>
+
+    <!-- チャートエリア -->
+    <div class="charts-row">
+      <div class="chart-box"><div id="pl_8101"></div></div>
+      <div class="chart-box"><div id="div_8101"></div></div>
+    </div>
+
+    <!-- 強み・弱み・カタリスト・リスク -->
+    <div class="swot-grid">
+      <div class="swot-card sw">
+        <div class="swot-title">💪 強み・ポジティブ</div>
+        <ul><li>配当成長率が圧倒的：DPS 22.5円→30→65→73→83→102円（5年で+353%）</li><li>売上高4年で+48%（1,118億→1,655億）と急成長</li><li>2025/3期FCF 26.6億円で配当1020百万をカバー、株主還元の持続性高い</li><li>PSR 0.19は超低水準（時価総額が年商の2割未満）</li></ul>
+      </div>
+      <div class="swot-card wk">
+        <div class="swot-title">⚠️ 弱み・課題</div>
+        <ul><li>粗利率10.1%と薄利体質（繊維商社の構造的課題）</li><li>自己資本比率37.5%はやや低め（有利子負債134億）</li><li>営業利益率2.1%は外部要因（原料・為替）で簡単にブレる</li></ul>
+      </div>
+      <div class="swot-card ca">
+        <div class="swot-title">🚀 カタリスト（1〜3ヶ月）</div>
+        <ul><li>増配の継続加速（過去5年の成長率から2026年度も102円→120円超を期待）</li><li>円安の恩恵（海外調達コスト増）が収益に一巡し、為替安定化で業績上ブレ</li><li>アパレル・産業向け需要回復（2026年春夏向け）</li><li>自社株買い発表の可能性（ペイアウト48%は余裕あり）</li></ul>
+      </div>
+      <div class="swot-card ri">
+        <div class="swot-title">🔴 リスク要因</div>
+        <ul><li>繊維業界の構造的縮小トレンド</li><li>海外調達コスト上昇（中国・東南アジア）</li><li>主力顧客の業績悪化リスク</li></ul>
+      </div>
+    </div>
+  </section>
+  <section class="company-section" id="c3333">
+    <div class="cs-header" style="border-left:4px solid #ff9060">
+      <div class="cs-rank">#4</div>
+      <div class="cs-info">
+        <div class="cs-code">3333</div>
+        <div class="cs-name">あさひ</div>
+      </div>
+      <div class="cs-meta">
+        <div class="cs-price">¥1,287.0</div>
+        <div class="cs-cap">335.2億円</div>
+        <div class="vbadge v-buy">★★★★&nbsp;買い</div>
+      </div>
+      <div class="cs-target">目標：+8〜12%（3ヶ月）</div>
+    </div>
+
+    <!-- ビジネス概要 -->
+    <div class="cs-biz">
+      <div class="biz-label">ビジネスモデル</div>
+      <div class="biz-text">全国最大の自転車専門小売チェーン「サイクルベースあさひ」を運営。整備・修理サービスと高粗利のパーツ販売を軸に高い粗利率を維持。近年はE-bike（電動自転車）の取り扱い強化。</div>
+    </div>
+
+    <!-- 財務サマリー -->
+    <div class="fin-grid">
+    <div class="fc">
+      <div class="fc-label">ROE</div>
+      <div class="fc-val mid-v">6.75%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">ROA</div>
+      <div class="fc-val mid-v">4.72%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">粗利率</div>
+      <div class="fc-val good-v">47.73%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">営業利益率</div>
+      <div class="fc-val mid-v">2.99%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">純利益率</div>
+      <div class="fc-val mid-v">3.34%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">配当性向</div>
+      <div class="fc-val mid-v">44.56%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">自己資本比率</div>
+      <div class="fc-val good-v">71.8%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">流動比率</div>
+      <div class="fc-val good-v">2.33</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">FCF（直近期）</div>
+      <div class="fc-val good-v">1,591百万</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">EPS</div>
+      <div class="fc-val mid-v">112円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">BPS</div>
+      <div class="fc-val mid-v">1570円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">DPS</div>
+      <div class="fc-val good-v">50.0円</div>
+    </div></div>
+
+    <!-- 52週レンジ -->
+    <div class="range-bar-wrap">
+      <span class="range-lo">安値 1,219.0</span>
+      <div class="range-bar-outer">
+        <div class="range-bar-inner" style="left:22%;background:#ff9060"></div>
+        <div class="range-bar-fill" style="width:22%;background:#ff906022"></div>
+      </div>
+      <span class="range-hi">高値 1,522.0</span>
+      <span class="range-info">現値 1,287.0　|　安値比+5.6%　高値比-15.4%　|　MA50:📉 下　MA200:📉 下</span>
+    </div>
+
+    <!-- チャートエリア -->
+    <div class="charts-row">
+      <div class="chart-box"><div id="pl_3333"></div></div>
+      <div class="chart-box"><div id="div_3333"></div></div>
+    </div>
+
+    <!-- 強み・弱み・カタリスト・リスク -->
+    <div class="swot-grid">
+      <div class="swot-card sw">
+        <div class="swot-title">💪 強み・ポジティブ</div>
+        <ul><li>無借金経営・自己資本比率 71.9%（5社中最高の財務健全性）</li><li>粗利率 47.7%は5社中断トツ（修理・サービス収益が下支え）</li><li>売上4年で+14%の安定成長（713億→815億）、直近期も過去最高売上</li><li>2026/2/19に25円の期末配当を実施済み（安定配当の実績）</li></ul>
+      </div>
+      <div class="swot-card wk">
+        <div class="swot-title">⚠️ 弱み・課題</div>
+        <ul><li>ROE 6.7%は5社中最低（無借金の反動で資本効率が劣る）</li><li>売上成長率が鈍化傾向（コロナ特需の反動）</li><li>2025/3期FCF 15.9億とやや低下（店舗投資増）</li></ul>
+      </div>
+      <div class="swot-card ca">
+        <div class="swot-title">🚀 カタリスト（1〜3ヶ月）</div>
+        <ul><li>春の自転車シーズン（3〜5月）での売上・客数増加が株価の季節性カタリスト</li><li>E-bike（電動自転車）の普及加速（客単価向上・高粗利）</li><li>ROE向上策として自社株買い実施の可能性</li><li>2026/2期（来期）の業績改善と増配発表</li></ul>
+      </div>
+      <div class="swot-card ri">
+        <div class="swot-title">🔴 リスク要因</div>
+        <ul><li>消費者の節約志向による自転車買い替えサイクル長期化</li><li>自転車本体の価格上昇で客単価↑だが数量↓の可能性</li><li>競合（ホームセンター、Amazon）との価格競争</li></ul>
+      </div>
+    </div>
+  </section>
+  <section class="company-section" id="c256A">
+    <div class="cs-header" style="border-left:4px solid #b0b8d0">
+      <div class="cs-rank">#5</div>
+      <div class="cs-info">
+        <div class="cs-code">256A</div>
+        <div class="cs-name">鳥島ホールディングス</div>
+      </div>
+      <div class="cs-meta">
+        <div class="cs-price">¥2,509.0</div>
+        <div class="cs-cap">480.6億円</div>
+        <div class="vbadge v-watch">★★★&nbsp;様子見</div>
+      </div>
+      <div class="cs-target">目標：+5〜10%（3ヶ月、不確実性高）</div>
+    </div>
+
+    <!-- ビジネス概要 -->
+    <div class="cs-biz">
+      <div class="biz-label">ビジネスモデル</div>
+      <div class="biz-text">食品・生活用品の物流・卸売・小売を中核とするホールディングス（2023年上場）。傘下に複数の食品流通子会社を持ち、近畿・中部地方を中心に展開。物流効率化とM&A戦略で規模拡大中。</div>
+    </div>
+
+    <!-- 財務サマリー -->
+    <div class="fin-grid">
+    <div class="fc">
+      <div class="fc-label">ROE</div>
+      <div class="fc-val mid-v">9.45%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">ROA</div>
+      <div class="fc-val mid-v">2.89%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">粗利率</div>
+      <div class="fc-val mid-v">12.3%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">営業利益率</div>
+      <div class="fc-val mid-v">5.92%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">純利益率</div>
+      <div class="fc-val mid-v">3.5%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">配当性向</div>
+      <div class="fc-val mid-v">46.28%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">自己資本比率</div>
+      <div class="fc-val mid-v">32.0%</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">流動比率</div>
+      <div class="fc-val mid-v">1.27</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">FCF（直近期）</div>
+      <div class="fc-val good-v">1,398百万</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">EPS</div>
+      <div class="fc-val mid-v">195円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">BPS</div>
+      <div class="fc-val mid-v">2755円</div>
+    </div>
+    <div class="fc">
+      <div class="fc-label">DPS</div>
+      <div class="fc-val good-v">100.0円</div>
+    </div></div>
+
+    <!-- 52週レンジ -->
+    <div class="range-bar-wrap">
+      <span class="range-lo">安値 1,453.0</span>
+      <div class="range-bar-outer">
+        <div class="range-bar-inner" style="left:86%;background:#b0b8d0"></div>
+        <div class="range-bar-fill" style="width:86%;background:#b0b8d022"></div>
+      </div>
+      <span class="range-hi">高値 2,684.0</span>
+      <span class="range-info">現値 2,509.0　|　安値比+72.7%　高値比-6.5%　|　MA50:📈 上　MA200:📈 上</span>
+    </div>
+
+    <!-- チャートエリア -->
+    <div class="charts-row">
+      <div class="chart-box"><div id="pl_256A"></div></div>
+      <div class="chart-box"><div id="div_256A"></div></div>
+    </div>
+
+    <!-- 強み・弱み・カタリスト・リスク -->
+    <div class="swot-grid">
+      <div class="swot-card sw">
+        <div class="swot-title">💪 強み・ポジティブ</div>
+        <ul><li>営業利益が3期連続増益（4,147→5,253→6,427百万、+55%）</li><li>売上高4年で+17%（1,176億→1,382億）の安定成長</li><li>直近期OCF 28億と安定的なキャッシュ創出</li><li>PSR 0.35、PBR 0.91と割安水準を維持</li></ul>
+      </div>
+      <div class="swot-card wk">
+        <div class="swot-title">⚠️ 弱み・課題</div>
+        <ul><li>自己資本比率 32.0%（5社中最低、有利子負債364億は重い）</li><li>2024/3期FCF が▲118億と大幅マイナス（買収・投資による）</li><li>配当履歴が浅く（上場1〜2年）、配当方針の継続性が未実証</li><li>時価総額480億と本スクリーニング内で最大（小型割安の恩恵が薄い）</li></ul>
+      </div>
+      <div class="swot-card ca">
+        <div class="swot-title">🚀 カタリスト（1〜3ヶ月）</div>
+        <ul><li>上場後の機関投資家組み入れ・証券会社カバレッジ開始</li><li>物流DX投資の成果が収益に反映（コスト削減効果）</li><li>食品流通M&Aでシナジー発現、増収増益が続けば株価再評価</li><li>増配発表（初の2期目配当実績確立）</li></ul>
+      </div>
+      <div class="swot-card ri">
+        <div class="swot-title">🔴 リスク要因</div>
+        <ul><li>高い有利子負債（D/E 87）が金利上昇局面でリスク</li><li>上場後のロックアップ解除売り圧力</li><li>食品物流業界の構造変化（物流2024年問題）</li></ul>
+      </div>
+    </div>
+  </section>
+
+<footer>GT-SOAR Analysis System ｜ 2026-02-20 ｜ Data: yfinance ｜ 本レポートは情報提供目的のみで投資推奨ではありません</footer>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+// 9441 P&L
+Plotly.newPlot('pl_9441', [
+  {type:'bar', name:'売上高(億)', x:['2021/12', '2022/12', '2023/12', '2024/12'], y:[1072.8, 1027.8, 1154.9, 1160.4],
+   marker:{color:'rgba(60,80,140,0.7)'}, yaxis:'y',
+   hovertemplate:'%{x}<br>売上: %{y:.1f}億<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'営業利益(百万)', x:['2021/12', '2022/12', '2023/12', '2024/12'], y:[4678.0, 3535.0, 3531.0, 4264.0],
+   line:{color:'#ffd54f',width:2.5}, marker:{size:7}, yaxis:'y2',
+   hovertemplate:'%{x}<br>営業利益: %{y:,.0f}百万<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'純利益(百万)', x:['2021/12', '2022/12', '2023/12', '2024/12'], y:[3277.0, 2522.0, 2381.0, 3177.0],
+   line:{color:'rgba(200,200,100,0.9)',width:2,dash:'dot'}, marker:{size:6}, yaxis:'y2',
+   hovertemplate:'%{x}<br>純利益: %{y:,.0f}百万<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:50,r:55}, height:220,
+  title:{text:'売上・利益推移', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  legend:{orientation:'h',x:0,y:1.15,font:{size:9},bgcolor:'rgba(0,0,0,0)'},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{title:'売上高(億)',gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f'},
+  yaxis2:{title:'利益(百万)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)',tickformat:',d'},
+  barmode:'overlay',
+}, {responsive:true,displayModeBar:false});
+
+// 9441 配当
+Plotly.newPlot('div_9441', [
+  {type:'bar', name:'年間DPS(円)', x:['2021', '2022', '2023', '2024', '2025'], y:[51.34, 41.0, 43.0, 50.0, 102.0],
+   marker:{color:'#ffd54f',opacity:0.85},
+   hovertemplate:'%{x}<br>DPS: %{y:.1f}円<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:45,r:20}, height:220,
+  title:{text:'配当推移 (年間DPS)', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  showlegend:false,
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f',ticksuffix:'円'},
+}, {responsive:true,displayModeBar:false});
+
+// 9908 P&L
+Plotly.newPlot('pl_9908', [
+  {type:'bar', name:'売上高(億)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[918.6, 1047.8, 1085.4, 1212.4],
+   marker:{color:'rgba(60,80,140,0.7)'}, yaxis:'y',
+   hovertemplate:'%{x}<br>売上: %{y:.1f}億<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'営業利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[2665.0, 3740.0, 4431.0, 4738.0],
+   line:{color:'#26c6a0',width:2.5}, marker:{size:7}, yaxis:'y2',
+   hovertemplate:'%{x}<br>営業利益: %{y:,.0f}百万<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'純利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[2252.0, 2905.0, 2948.0, 2973.0],
+   line:{color:'rgba(200,200,100,0.9)',width:2,dash:'dot'}, marker:{size:6}, yaxis:'y2',
+   hovertemplate:'%{x}<br>純利益: %{y:,.0f}百万<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:50,r:55}, height:220,
+  title:{text:'売上・利益推移', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  legend:{orientation:'h',x:0,y:1.15,font:{size:9},bgcolor:'rgba(0,0,0,0)'},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{title:'売上高(億)',gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f'},
+  yaxis2:{title:'利益(百万)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)',tickformat:',d'},
+  barmode:'overlay',
+}, {responsive:true,displayModeBar:false});
+
+// 9908 配当
+Plotly.newPlot('div_9908', [
+  {type:'bar', name:'年間DPS(円)', x:['2021', '2022', '2023', '2024', '2025'], y:[40.0, 70.0, 80.0, 85.0, 90.0],
+   marker:{color:'#26c6a0',opacity:0.85},
+   hovertemplate:'%{x}<br>DPS: %{y:.1f}円<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:45,r:20}, height:220,
+  title:{text:'配当推移 (年間DPS)', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  showlegend:false,
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f',ticksuffix:'円'},
+}, {responsive:true,displayModeBar:false});
+
+// 8101 P&L
+Plotly.newPlot('pl_8101', [
+  {type:'bar', name:'売上高(億)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[1118.3, 1310.5, 1461.9, 1655.4],
+   marker:{color:'rgba(60,80,140,0.7)'}, yaxis:'y',
+   hovertemplate:'%{x}<br>売上: %{y:.1f}億<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'営業利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[2014.0, 1834.0, 2886.0, 2956.0],
+   line:{color:'#5ab4ff',width:2.5}, marker:{size:7}, yaxis:'y2',
+   hovertemplate:'%{x}<br>営業利益: %{y:,.0f}百万<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'純利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[1638.0, 1769.0, 2019.0, 2358.0],
+   line:{color:'rgba(200,200,100,0.9)',width:2,dash:'dot'}, marker:{size:6}, yaxis:'y2',
+   hovertemplate:'%{x}<br>純利益: %{y:,.0f}百万<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:50,r:55}, height:220,
+  title:{text:'売上・利益推移', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  legend:{orientation:'h',x:0,y:1.15,font:{size:9},bgcolor:'rgba(0,0,0,0)'},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{title:'売上高(億)',gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f'},
+  yaxis2:{title:'利益(百万)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)',tickformat:',d'},
+  barmode:'overlay',
+}, {responsive:true,displayModeBar:false});
+
+// 8101 配当
+Plotly.newPlot('div_8101', [
+  {type:'bar', name:'年間DPS(円)', x:['2021', '2022', '2023', '2024', '2025'], y:[30.0, 65.0, 73.0, 83.0, 97.0],
+   marker:{color:'#5ab4ff',opacity:0.85},
+   hovertemplate:'%{x}<br>DPS: %{y:.1f}円<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:45,r:20}, height:220,
+  title:{text:'配当推移 (年間DPS)', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  showlegend:false,
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f',ticksuffix:'円'},
+}, {responsive:true,displayModeBar:false});
+
+// 3333 P&L
+Plotly.newPlot('pl_3333', [
+  {type:'bar', name:'売上高(億)', x:['2022/02', '2023/02', '2024/02', '2025/02'], y:[714.0, 747.1, 780.8, 815.9],
+   marker:{color:'rgba(60,80,140,0.7)'}, yaxis:'y',
+   hovertemplate:'%{x}<br>売上: %{y:.1f}億<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'営業利益(百万)', x:['2022/02', '2023/02', '2024/02', '2025/02'], y:[5221.0, 5128.0, 4912.0, 5486.0],
+   line:{color:'#ff9060',width:2.5}, marker:{size:7}, yaxis:'y2',
+   hovertemplate:'%{x}<br>営業利益: %{y:,.0f}百万<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'純利益(百万)', x:['2022/02', '2023/02', '2024/02', '2025/02'], y:[3542.0, 3366.0, 3113.0, 3556.0],
+   line:{color:'rgba(200,200,100,0.9)',width:2,dash:'dot'}, marker:{size:6}, yaxis:'y2',
+   hovertemplate:'%{x}<br>純利益: %{y:,.0f}百万<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:50,r:55}, height:220,
+  title:{text:'売上・利益推移', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  legend:{orientation:'h',x:0,y:1.15,font:{size:9},bgcolor:'rgba(0,0,0,0)'},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{title:'売上高(億)',gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f'},
+  yaxis2:{title:'利益(百万)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)',tickformat:',d'},
+  barmode:'overlay',
+}, {responsive:true,displayModeBar:false});
+
+// 3333 配当
+Plotly.newPlot('div_3333', [
+  {type:'bar', name:'年間DPS(円)', x:['2022', '2023', '2024', '2025', '2026'], y:[28.0, 50.5, 47.5, 50.0, 25.0],
+   marker:{color:'#ff9060',opacity:0.85},
+   hovertemplate:'%{x}<br>DPS: %{y:.1f}円<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:45,r:20}, height:220,
+  title:{text:'配当推移 (年間DPS)', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  showlegend:false,
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f',ticksuffix:'円'},
+}, {responsive:true,displayModeBar:false});
+
+// 256A P&L
+Plotly.newPlot('pl_256A', [
+  {type:'bar', name:'売上高(億)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[1176.6, 1259.4, 1320.5, 1382.6],
+   marker:{color:'rgba(60,80,140,0.7)'}, yaxis:'y',
+   hovertemplate:'%{x}<br>売上: %{y:.1f}億<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'営業利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[4575.0, 4147.0, 5253.0, 6427.0],
+   line:{color:'#b0b8d0',width:2.5}, marker:{size:7}, yaxis:'y2',
+   hovertemplate:'%{x}<br>営業利益: %{y:,.0f}百万<extra></extra>'},
+  {type:'scatter', mode:'lines+markers', name:'純利益(百万)', x:['2022/03', '2023/03', '2024/03', '2025/03'], y:[3219.0, 3038.0, 3403.0, 3723.0],
+   line:{color:'rgba(200,200,100,0.9)',width:2,dash:'dot'}, marker:{size:6}, yaxis:'y2',
+   hovertemplate:'%{x}<br>純利益: %{y:,.0f}百万<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:50,r:55}, height:220,
+  title:{text:'売上・利益推移', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  legend:{orientation:'h',x:0,y:1.15,font:{size:9},bgcolor:'rgba(0,0,0,0)'},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{title:'売上高(億)',gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f'},
+  yaxis2:{title:'利益(百万)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)',tickformat:',d'},
+  barmode:'overlay',
+}, {responsive:true,displayModeBar:false});
+
+// 256A 配当
+Plotly.newPlot('div_256A', [
+  {type:'bar', name:'年間DPS(円)', x:['2025'], y:[90.0],
+   marker:{color:'#b0b8d0',opacity:0.85},
+   hovertemplate:'%{x}<br>DPS: %{y:.1f}円<extra></extra>'},
+], {
+  paper_bgcolor:'#0d0f1a', plot_bgcolor:'#0d0f1a',
+  font:{color:'#8090b0',size:10}, margin:{t:28,b:30,l:45,r:20}, height:220,
+  title:{text:'配当推移 (年間DPS)', font:{size:11,color:'#c0d0f0'}, x:0.05},
+  showlegend:false,
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)'},
+  yaxis:{gridcolor:'rgba(30,40,70,0.6)',tickformat:'.0f',ticksuffix:'円'},
+}, {responsive:true,displayModeBar:false});
+</script>
+</body>
+</html>

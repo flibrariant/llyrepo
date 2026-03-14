@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLY – Eli Lilly ファンダメンタルズ分析</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
+.header{background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%);padding:32px 40px;border-bottom:2px solid #c084fc}
+.header h1{font-size:2rem;font-weight:700;color:#f1f5f9}
+.header p{color:#94a3b8;margin-top:4px}
+.badge{display:inline-block;background:#7c3aed;color:#fff;border-radius:20px;padding:2px 12px;font-size:0.75rem;margin-left:8px}
+.container{max-width:1200px;margin:0 auto;padding:32px 20px}
+.section{margin-bottom:40px}
+.section-title{font-size:1.1rem;font-weight:700;color:#c084fc;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;border-left:4px solid #7c3aed;padding-left:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px}
+.metric-big{font-size:2rem;font-weight:700;color:#f1f5f9}
+.metric-label{font-size:0.78rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.metric-sub{font-size:0.85rem;color:#94a3b8;margin-top:6px}
+.positive{color:#4ade80}
+.negative{color:#f87171}
+.neutral{color:#fbbf24}
+.range-bar{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px}
+.range-track{height:12px;background:#334155;border-radius:6px;position:relative;margin:16px 0}
+.range-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171)}
+.range-dot{width:16px;height:16px;background:#f1f5f9;border-radius:50%;position:absolute;top:-2px;transform:translateX(-50%);border:2px solid #7c3aed}
+.range-labels{display:flex;justify-content:space-between;font-size:0.75rem;color:#64748b}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{background:#0f172a;color:#94a3b8;padding:10px 12px;text-align:left;text-transform:uppercase;font-size:0.72rem;letter-spacing:.05em;border-bottom:2px solid #334155}
+td{padding:10px 12px;border-bottom:1px solid #1e293b;color:#e2e8f0}
+tr:hover td{background:#1e293b}
+.chart-wrap{position:relative;height:260px}
+.swot{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.swot-cell{padding:20px;border:1px solid #334155}
+.swot-cell.S{background:#052e16;border-color:#166534}
+.swot-cell.W{background:#2c1a0e;border-color:#92400e}
+.swot-cell.O{background:#0f2027;border-color:#1e3a5f}
+.swot-cell.T{background:#2d0f0f;border-color:#991b1b}
+.swot-title{font-weight:700;font-size:0.9rem;margin-bottom:10px}
+.swot-title.S{color:#4ade80}.swot-title.W{color:#fb923c}.swot-title.O{color:#60a5fa}.swot-title.T{color:#f87171}
+.swot-cell ul{padding-left:16px;color:#cbd5e1;font-size:0.84rem}
+.swot-cell li{margin-bottom:4px}
+.verdict-card{background:linear-gradient(135deg,#1a1040 0%,#1e293b 100%);border:2px solid #7c3aed;border-radius:16px;padding:28px}
+.stars{font-size:1.6rem;color:#fbbf24;margin-bottom:12px}
+.verdict-title{font-size:1.2rem;font-weight:700;color:#f1f5f9;margin-bottom:8px}
+.verdict-body{color:#cbd5e1;font-size:0.9rem;line-height:1.8}
+.tag{display:inline-block;background:#1e3a5f;color:#93c5fd;border-radius:4px;padding:2px 8px;font-size:0.75rem;margin:2px}
+.tag.red{background:#3b0d0d;color:#fca5a5}
+.tag.green{background:#052e16;color:#86efac}
+.divider{border:none;border-top:1px solid #334155;margin:12px 0}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Eli Lilly and Company <span style="color:#94a3b8;font-size:1.2rem">LLY</span>
+    <span class="badge">NYSE</span>
+    <span class="badge" style="background:#166534">Healthcare · Pharma</span>
+  </h1>
+  <p>ファンダメンタルズ分析レポート &nbsp;|&nbsp; 分析日: 2026-03-12 &nbsp;|&nbsp; データ: yfinance</p>
+</div>
+
+<div class="container">
+
+<!-- 主要KPI -->
+<div class="section">
+  <div class="section-title">主要指標</div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="metric-big">$994.01</div>
+      <div class="metric-label">現在株価 (USD)</div>
+      <div class="metric-sub">アナリスト目標 <strong class="positive">$1,214</strong> <span class="positive">(+22.2%)</span></div>
+    </div>
+    <div class="card">
+      <div class="metric-big">$890B</div>
+      <div class="metric-label">時価総額</div>
+      <div class="metric-sub">米国第4位規模</div>
+    </div>
+    <div class="card">
+      <div class="metric-big positive">42.6%</div>
+      <div class="metric-label">売上高成長率 YoY</div>
+      <div class="metric-sub">2025年実績（Mounjaro/Zepbound牽引）</div>
+    </div>
+    <div class="card">
+      <div class="metric-big positive">101.2%</div>
+      <div class="metric-label">ROE</div>
+      <div class="metric-sub">超高収益体質</div>
+    </div>
+  </div>
+</div>
+
+<!-- バリュエーション -->
+<div class="section">
+  <div class="section-title">バリュエーション指標</div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="metric-big">43.3x</div>
+      <div class="metric-label">PER (実績)</div>
+      <div class="metric-sub">フォワードPER <strong class="positive">23.7x</strong></div>
+    </div>
+    <div class="card">
+      <div class="metric-big">33.5x</div>
+      <div class="metric-label">PBR</div>
+      <div class="metric-sub">高成長プレミアム</div>
+    </div>
+    <div class="card">
+      <div class="metric-big">13.6x</div>
+      <div class="metric-label">PSR</div>
+      <div class="metric-sub">医薬品業界平均 ~4-6x</div>
+    </div>
+    <div class="card">
+      <div class="metric-big">62.00%</div>
+      <div class="metric-label">配当利回り</div>
+      <div class="metric-sub">直近配当 $1.73/四半期 <span class="positive">+15%増配</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 52週レンジ -->
+<div class="section">
+  <div class="section-title">52週株価レンジ</div>
+  <div class="range-bar">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="color:#94a3b8;font-size:0.85rem">52週安値 <strong style="color:#f87171">$623.78</strong></span>
+      <span style="color:#f1f5f9;font-weight:700">現在 $994.01 （レンジ内 72.6%位置）</span>
+      <span style="color:#94a3b8;font-size:0.85rem">52週高値 <strong style="color:#4ade80">$1,133.95</strong></span>
+    </div>
+    <div class="range-track">
+      <div class="range-fill" style="width:72.6%"></div>
+      <div class="range-dot" style="left:72.6%"></div>
+    </div>
+    <div class="range-labels"><span>$624</span><span>$1,134</span></div>
+    <p style="margin-top:12px;color:#94a3b8;font-size:0.82rem">
+      高値から <span class="negative">12.3%</span> 下落。アナリスト目標株価 $1,214 まで <span class="positive">+22.2%</span> の上昇余地。
+    </p>
+  </div>
+</div>
+
+<!-- 収益性 -->
+<div class="section">
+  <div class="section-title">収益性マージン</div>
+  <div class="grid-3">
+    <div class="card" style="text-align:center">
+      <div class="metric-big positive">83.0%</div>
+      <div class="metric-label">粗利益率</div>
+      <div class="metric-sub">製薬業界トップクラス</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="metric-big positive">44.9%</div>
+      <div class="metric-label">営業利益率</div>
+      <div class="metric-sub">2022年: 29% → 2025年: 45%</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="metric-big positive">31.7%</div>
+      <div class="metric-label">純利益率</div>
+      <div class="metric-sub">EPS: $22.93 → fwd $41.95</div>
+    </div>
+  </div>
+</div>
+
+<!-- P&Lトレンド + 四半期 -->
+<div class="section">
+  <div class="section-title">業績トレンド</div>
+  <div class="grid-2">
+    <div class="card">
+      <div style="font-size:0.85rem;color:#94a3b8;margin-bottom:12px">年次 P&L (億USD)</div>
+      <div class="chart-wrap"><canvas id="plChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div style="font-size:0.85rem;color:#94a3b8;margin-bottom:12px">四半期売上高 (億USD)</div>
+      <div class="chart-wrap"><canvas id="qChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- キャッシュフロー -->
+<div class="section">
+  <div class="section-title">キャッシュフロー推移</div>
+  <div class="card">
+    <div class="chart-wrap"><canvas id="cfChart"></canvas></div>
+  </div>
+</div>
+
+<!-- 配当推移 -->
+<div class="section">
+  <div class="section-title">年次配当推移 (DPS)</div>
+  <div class="card">
+    <div class="chart-wrap" style="height:200px"><canvas id="divChart"></canvas></div>
+  </div>
+</div>
+
+<!-- 株価推移 -->
+<div class="section">
+  <div class="section-title">株価推移 (月次・過去2年)</div>
+  <div class="card">
+    <div class="chart-wrap" style="height:220px"><canvas id="priceChart"></canvas></div>
+  </div>
+</div>
+
+<!-- SWOT -->
+<div class="section">
+  <div class="section-title">SWOT 分析</div>
+  <div class="swot" style="border-radius:12px;overflow:hidden">
+    <div class="swot-cell S">
+      <div class="swot-title S">S 強み</div>
+      <ul>
+        <li>GLP-1/GIP薬 tirzepatide（Mounjaro/Zepbound）の独占的競争優位</li>
+        <li>2022→2025年で売上+128%、営業利益+259%の爆発的成長</li>
+        <li>粗利益率83%・営業利益率45%の超高収益体質</li>
+        <li>ドナネマブ（Alzheimer's）承認済み、パイプライン多様化</li>
+        <li>R&D投資 $13B超、継続的な新薬創出能力</li>
+      </ul>
+    </div>
+    <div class="swot-cell W">
+      <div class="swot-title W">W 弱み</div>
+      <ul>
+        <li>tirzepatideへの売上集中リスク（過度な依存）</li>
+        <li>PBR 33x・PSR 13.7x と高バリュエーション、下落耐性低</li>
+        <li>設備投資急増（2025年: $10.8B）でFCFが圧迫</li>
+        <li>有利子負債 $42.5B と大幅増加、D/Eレシオ悪化</li>
+        <li>生産キャパシティ制約による供給不足リスク</li>
+      </ul>
+    </div>
+    <div class="swot-cell O">
+      <div class="swot-title O">O 機会</div>
+      <ul>
+        <li>GLP-1肥満症市場は2030年まで年50%+ CAGR予測</li>
+        <li>心血管疾患・腎臓病など適応拡大（SURPASS-CVOT等）</li>
+        <li>新興国市場への肥満症薬拡販</li>
+        <li>Alzheimer's領域：ドナネマブの市場浸透加速</li>
+        <li>EPS 2025→2026でさらに成長、フォワードPERの縮小</li>
+      </ul>
+    </div>
+    <div class="swot-cell T">
+      <div class="swot-title T">T リスク</div>
+      <ul>
+        <li>IRA（インフレ抑制法）によるMedicare薬価交渉</li>
+        <li>Novo Nordisk（セマグルチド）との熾烈な競争</li>
+        <li>GLP-1経口薬の競合参入（Pfizer, AstraZeneca等）</li>
+        <li>規制リスク：副作用報告・FDA対応コスト増</li>
+        <li>株価が高値圏から-12%調整中、マクロ金利感応</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 投資判定 -->
+<div class="section">
+  <div class="section-title">投資判定</div>
+  <div class="verdict-card">
+    <div class="stars">★★★★☆</div>
+    <div class="verdict-title">判定：<span class="positive">中期買い / 押し目待ち</span></div>
+    <hr class="divider">
+    <div class="verdict-body">
+      <p><strong style="color:#f1f5f9">【総評】</strong><br>
+      イーライリリーは tirzepatide（Mounjaro糖尿病・Zepbound肥満）という歴史的ブロックバスターを擁し、
+      2022→2025年の3年間で売上高2.3倍・営業利益3.6倍という驚異的成長を達成。
+      現在のフォワードPER <strong>23.7x</strong> は成長率（EPS: $22.93→$41.95 予想+83%）対比でむしろ
+      割安圏に入りつつある。アナリスト目標株価 <strong>$1,214</strong>（+22.2%上昇余地）。</p>
+      
+      <br>
+      
+      <p><strong style="color:#f1f5f9">【1ヶ月視点の判断】</strong><br>
+      現在株価は52週高値$1,133から<strong class="negative">-12%</strong>の位置。
+      高値から調整中だが、Q1 2026決算（4月下旬発表予定）に向けた期待から
+      徐々に買い直しが入りやすい局面。ただし短期10%上昇には確実なカタリストが必要。</p>
+      
+      <br>
+      
+      <p><strong style="color:#f1f5f9">【カタリスト】</strong><br>
+      <span class="tag green">Q1決算（4月）での売上beat</span>
+      <span class="tag green">Zepbound適応拡大承認</span>
+      <span class="tag green">2026年業績ガイダンス引き上げ</span>
+      <span class="tag green">GLP-1需要統計上振れ</span>
+      <span class="tag">ドナネマブ市場浸透加速</span>
+      </p>
+      
+      <br>
+      
+      <p><strong style="color:#f1f5f9">【リスク要因】</strong><br>
+      <span class="tag red">IRA薬価交渉の影響拡大</span>
+      <span class="tag red">Novo競合激化</span>
+      <span class="tag red">高バリュエーション（PSR 13.7x）</span>
+      <span class="tag red">設備投資急増によるFCF圧縮</span>
+      </p>
+      
+      <br>
+      
+      <p><strong style="color:#f1f5f9">【結論】</strong><br>
+      中長期（3-12ヶ月）では<span class="positive"><strong>強く買い</strong></span>。
+      短期1ヶ月では$950-$1,000の水準で打診買い。
+      $960割れはストップロス目安。Q1決算期待で$1,050-$1,100の回復を想定。
+      </p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+const YEARS = ["2022", "2023", "2024", "2025"];
+const REV   = [28.54, 34.12, 45.04, 65.18];
+const OPI   = [8.28, 10.32, 17.04, 29.7];
+const NI    = [6.24, 5.24, 10.59, 20.64];
+const RD    = [7.19, 9.31, 10.99, 13.34];
+const OCF   = [7.59, 4.24, 8.82, 16.81];
+const FCF   = [4.6, -3.15, 0.41, 5.96];
+const Q_LAB = ["2024-12", "2025-03", "2025-06", "2025-09", "2025-12"];
+const Q_VAL = [13.53, 12.73, 15.56, 17.6, 19.29];
+const P_LAB = ["2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"];
+const P_VAL = [770.35, 809.05, 894.45, 794.56, 948.43, 876.46, 820.87, 786.84, 765.01, 803.73, 912.29, 819.84, 892.34, 732.25, 775.39, 736.14, 728.69, 760.61, 860.16, 1072.1, 1072.89, 1035.42, 1050.24, 994.1];
+const D_LAB = ["2021", "2022", "2023", "2024", "2025", "2026"];
+const D_VAL = [3.4, 3.92, 4.52, 5.2, 6.0, 1.73];
+
+const defaults = {
+  responsive: true, maintainAspectRatio: false,
+  plugins:{ legend:{ labels:{ color:'#94a3b8', boxWidth:12 } }, tooltip:{ backgroundColor:'#1e293b', borderColor:'#334155', borderWidth:1, titleColor:'#f1f5f9', bodyColor:'#cbd5e1' } },
+  scales:{ x:{ ticks:{ color:'#64748b' }, grid:{ color:'#1e293b' } }, y:{ ticks:{ color:'#64748b' }, grid:{ color:'#334155' } } }
+};
+
+// P&L Chart
+new Chart(document.getElementById('plChart'), {
+  type:'bar',
+  data:{
+    labels: YEARS,
+    datasets:[
+      { label:'売上高', data: REV,  backgroundColor:'rgba(96,165,250,0.7)', borderColor:'#60a5fa', borderWidth:1 },
+      { label:'営業利益', data: OPI, backgroundColor:'rgba(74,222,128,0.7)', borderColor:'#4ade80', borderWidth:1 },
+      { label:'純利益', data: NI,   backgroundColor:'rgba(192,132,252,0.7)', borderColor:'#c084fc', borderWidth:1 },
+      { label:'R&D', data: RD,     backgroundColor:'rgba(251,191,36,0.5)',  borderColor:'#fbbf24', borderWidth:1 }
+    ]
+  },
+  options:{ ...defaults }
+});
+
+// Quarterly Chart
+new Chart(document.getElementById('qChart'), {
+  type:'bar',
+  data:{
+    labels: Q_LAB,
+    datasets:[{ label:'四半期売上高(B USD)', data: Q_VAL, backgroundColor:'rgba(96,165,250,0.7)', borderColor:'#60a5fa', borderWidth:1 }]
+  },
+  options:{ ...defaults }
+});
+
+// CF Chart
+new Chart(document.getElementById('cfChart'), {
+  type:'bar',
+  data:{
+    labels: YEARS,
+    datasets:[
+      { label:'営業CF', data: OCF, backgroundColor:'rgba(74,222,128,0.7)', borderColor:'#4ade80', borderWidth:1 },
+      { label:'FCF',    data: FCF, backgroundColor:'rgba(192,132,252,0.7)', borderColor:'#c084fc', borderWidth:1 }
+    ]
+  },
+  options:{ ...defaults, plugins:{ ...defaults.plugins, title:{ display:true, text:'キャッシュフロー (B USD)', color:'#94a3b8' } } }
+});
+
+// Div Chart
+new Chart(document.getElementById('divChart'), {
+  type:'bar',
+  data:{
+    labels: D_LAB,
+    datasets:[{ label:'年間DPS (USD)', data: D_VAL, backgroundColor:'rgba(251,191,36,0.7)', borderColor:'#fbbf24', borderWidth:1 }]
+  },
+  options:{ ...defaults }
+});
+
+// Price Chart
+new Chart(document.getElementById('priceChart'), {
+  type:'line',
+  data:{
+    labels: P_LAB,
+    datasets:[{ label:'LLY 株価 (USD)', data: P_VAL, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,0.1)', fill:true, tension:0.3, pointRadius:3, pointHoverRadius:6 }]
+  },
+  options:{ ...defaults }
+});
+</script>
+</body>
+</html>

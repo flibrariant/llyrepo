@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IHI (7013) 前場取引分析 2026/02/20</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',Meiryo,sans-serif}
+.header{background:linear-gradient(135deg,#1a237e,#283593);padding:18px 28px;border-bottom:2px solid #3949ab;display:flex;align-items:center;gap:16px}
+.header h1{font-size:1.35rem;font-weight:700}
+.header p{color:#b3c5f5;font-size:.82rem;margin-top:4px}
+.badge{background:#3949ab;border-radius:6px;padding:5px 12px;font-size:.78rem;color:#e8eaf6;white-space:nowrap}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 20px}
+.stat-card{background:#1e2130;border-radius:8px;padding:13px 15px;border:1px solid #2a2d3e}
+.stat-label{font-size:.68rem;color:#7986cb;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:1.5rem;font-weight:700;margin-top:3px}
+.stat-sub{font-size:.72rem;color:#90a4ae;margin-top:2px}
+.positive{color:#26a69a}.negative{color:#ef5350}.neutral{color:#e0e0e0}
+.chart-wrap{background:#1e2130;border-radius:8px;margin:0 20px 14px;border:1px solid #2a2d3e;overflow:hidden}
+.section{padding:0 20px 14px}
+.sec-title{font-size:.78rem;color:#7986cb;text-transform:uppercase;letter-spacing:1px;padding:10px 20px 3px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.81rem}
+thead tr{background:#1a237e}
+th{padding:8px 9px;text-align:left;color:#b3c5f5;font-weight:600}
+tbody tr:nth-child(even){background:#191c27}
+tbody tr:hover{background:#24273a}
+td{padding:6px 9px;border-bottom:1px solid #2a2d3e}
+.tc{text-align:center}.tr{text-align:right}
+.analysis{background:#1e2130;border-radius:8px;border:1px solid #2a2d3e;padding:16px 20px;margin:0 20px 20px}
+.analysis h2{font-size:.95rem;font-weight:600;color:#90caf9;margin-bottom:6px;margin-top:12px}
+.analysis h2:first-child{margin-top:0}
+.analysis p{line-height:1.7;font-size:.85rem;color:#cfd8dc;margin-bottom:6px}
+.analysis ul{margin-left:16px}
+.analysis li{line-height:1.75;font-size:.83rem;color:#b0bec5}
+.hl{color:#ffd54f;font-weight:600}
+.legend-note{font-size:.75rem;color:#7986cb;padding:4px 20px 0;}
+footer{text-align:center;padding:14px;color:#455a64;font-size:.73rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="flex:1">
+    <h1>IHI (7013) ｜ 前場 信用デイトレード分析</h1>
+    <p>2026年2月20日（木）　前場 09:22〜11:25　｜　3分足チャート ＋ 取引オーバーレイ</p>
+  </div>
+  <div class="badge">信用取引 SOR</div>
+  <div class="badge">29トレード</div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">総損益（税引前）</div>
+    <div class="stat-value positive">+8,860円</div>
+    <div class="stat-sub">手数料・金利別途</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">勝率</div>
+    <div class="stat-value positive">69.0%</div>
+    <div class="stat-sub">20勝 9敗</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">プロフィットファクター</div>
+    <div class="stat-value positive">3.31</div>
+    <div class="stat-sub">総利益÷総損失</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">平均利益 / 平均損失</div>
+    <div class="stat-value neutral">634 / 425円</div>
+    <div class="stat-sub">損益比 1.49x</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Long / Short / 平均保有</div>
+    <div class="stat-value neutral">18L・11S</div>
+    <div class="stat-sub">平均 1分8秒</div>
+  </div>
+</div>
+
+<p class="sec-title">▌ 3分足チャート ＋ 取引オーバーレイ</p>
+<p class="legend-note">▲ 緑：買建（Long IN）　▽ 緑：買埋（Short OUT）　▼ 赤：売建（Short IN）　△ 赤：売埋（Long OUT）　数字：各トレード損益</p>
+<div class="chart-wrap"><div id="mainChart"></div></div>
+
+<p class="sec-title">▌ 累積損益推移</p>
+<div class="chart-wrap"><div id="pnlChart"></div></div>
+
+<p class="sec-title">▌ トレード詳細</p>
+<div class="section">
+  <table>
+    <thead>
+      <tr>
+        <th class="tc">#</th><th class="tc">方向</th>
+        <th>エントリー時刻</th><th class="tr">エントリー価格</th>
+        <th>エグジット時刻</th><th class="tr">エグジット価格</th>
+        <th class="tc">保有時間</th>
+        <th class="tr">損益(円)</th><th class="tr">累積損益</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td class="tc">1</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:22:22</td>
+          <td class="tr">4,278.0</td>
+          <td>09:24:28</td>
+          <td class="tr">4,287.0</td>
+          <td class="tc">2分6秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+900</td>
+          <td class="tr" style="color:#26a69a">+900</td>
+        </tr>
+        <tr>
+          <td class="tc">2</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:26:56</td>
+          <td class="tr">4,302.0</td>
+          <td>09:27:19</td>
+          <td class="tr">4,304.0</td>
+          <td class="tc">23秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+200</td>
+          <td class="tr" style="color:#26a69a">+1,100</td>
+        </tr>
+        <tr>
+          <td class="tc">3</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:33:03</td>
+          <td class="tr">4,309.0</td>
+          <td>09:33:22</td>
+          <td class="tr">4,315.0</td>
+          <td class="tc">19秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+600</td>
+          <td class="tr" style="color:#26a69a">+1,700</td>
+        </tr>
+        <tr>
+          <td class="tc">4</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:33:40</td>
+          <td class="tr">4,321.0</td>
+          <td>09:34:07</td>
+          <td class="tr">4,330.0</td>
+          <td class="tc">27秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+900</td>
+          <td class="tr" style="color:#26a69a">+2,600</td>
+        </tr>
+        <tr>
+          <td class="tc">5</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:35:38</td>
+          <td class="tr">4,338.0</td>
+          <td>09:36:37</td>
+          <td class="tr">4,328.0</td>
+          <td class="tc">59秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-1,000</td>
+          <td class="tr" style="color:#26a69a">+1,600</td>
+        </tr>
+        <tr>
+          <td class="tc">6</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:37:30</td>
+          <td class="tr">4,334.0</td>
+          <td>09:37:43</td>
+          <td class="tr">4,337.6</td>
+          <td class="tc">13秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+360</td>
+          <td class="tr" style="color:#26a69a">+1,960</td>
+        </tr>
+        <tr>
+          <td class="tc">7</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:38:08</td>
+          <td class="tr">4,335.0</td>
+          <td>09:38:25</td>
+          <td class="tr">4,331.3</td>
+          <td class="tc">17秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-370</td>
+          <td class="tr" style="color:#26a69a">+1,590</td>
+        </tr>
+        <tr>
+          <td class="tc">8</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:44:07</td>
+          <td class="tr">4,320.3</td>
+          <td>09:47:41</td>
+          <td class="tr">4,320.0</td>
+          <td class="tc">3分34秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-30</td>
+          <td class="tr" style="color:#26a69a">+1,560</td>
+        </tr>
+        <tr>
+          <td class="tc">9</td>
+          <td class="tc">🔺 Long</td>
+          <td>09:55:28</td>
+          <td class="tr">4,336.0</td>
+          <td>09:57:17</td>
+          <td class="tr">4,355.0</td>
+          <td class="tc">1分49秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+1,900</td>
+          <td class="tr" style="color:#26a69a">+3,460</td>
+        </tr>
+        <tr>
+          <td class="tc">10</td>
+          <td class="tc">🔺 Long</td>
+          <td>10:01:12</td>
+          <td class="tr">4,366.0</td>
+          <td>10:01:23</td>
+          <td class="tr">4,369.0</td>
+          <td class="tc">11秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+300</td>
+          <td class="tr" style="color:#26a69a">+3,760</td>
+        </tr>
+        <tr>
+          <td class="tc">11</td>
+          <td class="tc">🔺 Long</td>
+          <td>10:01:45</td>
+          <td class="tr">4,377.0</td>
+          <td>10:02:54</td>
+          <td class="tr">4,373.0</td>
+          <td class="tc">1分9秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-400</td>
+          <td class="tr" style="color:#26a69a">+3,360</td>
+        </tr>
+        <tr>
+          <td class="tc">12</td>
+          <td class="tc">🔺 Long</td>
+          <td>10:11:42</td>
+          <td class="tr">4,377.0</td>
+          <td>10:14:10</td>
+          <td class="tr">4,378.0</td>
+          <td class="tc">2分28秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+100</td>
+          <td class="tr" style="color:#26a69a">+3,460</td>
+        </tr>
+        <tr>
+          <td class="tc">13</td>
+          <td class="tc">🔺 Long</td>
+          <td>10:15:37</td>
+          <td class="tr">4,382.0</td>
+          <td>10:18:00</td>
+          <td class="tr">4,383.0</td>
+          <td class="tc">2分23秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+100</td>
+          <td class="tr" style="color:#26a69a">+3,560</td>
+        </tr>
+        <tr>
+          <td class="tc">14</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:19:27</td>
+          <td class="tr">4,361.0</td>
+          <td>10:19:56</td>
+          <td class="tr">4,350.0</td>
+          <td class="tc">29秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+1,100</td>
+          <td class="tr" style="color:#26a69a">+4,660</td>
+        </tr>
+        <tr>
+          <td class="tc">15</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:30:40</td>
+          <td class="tr">4,351.0</td>
+          <td>10:31:22</td>
+          <td class="tr">4,347.0</td>
+          <td class="tc">42秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+400</td>
+          <td class="tr" style="color:#26a69a">+5,060</td>
+        </tr>
+        <tr>
+          <td class="tc">16</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:32:39</td>
+          <td class="tr">4,336.0</td>
+          <td>10:32:53</td>
+          <td class="tr">4,332.0</td>
+          <td class="tc">14秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+400</td>
+          <td class="tr" style="color:#26a69a">+5,460</td>
+        </tr>
+        <tr>
+          <td class="tc">17</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:35:35</td>
+          <td class="tr">4,309.0</td>
+          <td>10:36:27</td>
+          <td class="tr">4,307.0</td>
+          <td class="tc">52秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+200</td>
+          <td class="tr" style="color:#26a69a">+5,660</td>
+        </tr>
+        <tr>
+          <td class="tc">18</td>
+          <td class="tc">🔺 Long</td>
+          <td>10:39:22</td>
+          <td class="tr">4,321.0</td>
+          <td>10:39:58</td>
+          <td class="tr">4,322.0</td>
+          <td class="tc">36秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+100</td>
+          <td class="tr" style="color:#26a69a">+5,760</td>
+        </tr>
+        <tr>
+          <td class="tc">19</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:44:11</td>
+          <td class="tr">4,315.9</td>
+          <td>10:45:12</td>
+          <td class="tr">4,301.0</td>
+          <td class="tc">1分1秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+1,490</td>
+          <td class="tr" style="color:#26a69a">+7,250</td>
+        </tr>
+        <tr>
+          <td class="tc">20</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:46:36</td>
+          <td class="tr">4,295.0</td>
+          <td>10:47:30</td>
+          <td class="tr">4,290.0</td>
+          <td class="tc">54秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+500</td>
+          <td class="tr" style="color:#26a69a">+7,750</td>
+        </tr>
+        <tr>
+          <td class="tc">21</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:48:05</td>
+          <td class="tr">4,283.0</td>
+          <td>10:48:27</td>
+          <td class="tr">4,287.9</td>
+          <td class="tc">22秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-490</td>
+          <td class="tr" style="color:#26a69a">+7,260</td>
+        </tr>
+        <tr>
+          <td class="tc">22</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:50:08</td>
+          <td class="tr">4,291.0</td>
+          <td>10:51:30</td>
+          <td class="tr">4,285.6</td>
+          <td class="tc">1分22秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+540</td>
+          <td class="tr" style="color:#26a69a">+7,800</td>
+        </tr>
+        <tr>
+          <td class="tc">23</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:53:26</td>
+          <td class="tr">4,265.0</td>
+          <td>10:54:36</td>
+          <td class="tr">4,268.6</td>
+          <td class="tc">1分10秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-360</td>
+          <td class="tr" style="color:#26a69a">+7,440</td>
+        </tr>
+        <tr>
+          <td class="tc">24</td>
+          <td class="tc">🔻 Short</td>
+          <td>10:56:58</td>
+          <td class="tr">4,262.0</td>
+          <td>10:59:34</td>
+          <td class="tr">4,265.0</td>
+          <td class="tc">2分36秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-300</td>
+          <td class="tr" style="color:#26a69a">+7,140</td>
+        </tr>
+        <tr>
+          <td class="tc">25</td>
+          <td class="tc">🔺 Long</td>
+          <td>11:00:15</td>
+          <td class="tr">4,278.0</td>
+          <td>11:01:54</td>
+          <td class="tr">4,288.0</td>
+          <td class="tc">1分39秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+1,000</td>
+          <td class="tr" style="color:#26a69a">+8,140</td>
+        </tr>
+        <tr>
+          <td class="tc">26</td>
+          <td class="tc">🔺 Long</td>
+          <td>11:03:04</td>
+          <td class="tr">4,290.0</td>
+          <td>11:04:52</td>
+          <td class="tr">4,303.0</td>
+          <td class="tc">1分48秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+1,300</td>
+          <td class="tr" style="color:#26a69a">+9,440</td>
+        </tr>
+        <tr>
+          <td class="tc">27</td>
+          <td class="tc">🔺 Long</td>
+          <td>11:15:32</td>
+          <td class="tr">4,311.0</td>
+          <td>11:17:13</td>
+          <td class="tr">4,306.2</td>
+          <td class="tc">1分41秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-480</td>
+          <td class="tr" style="color:#26a69a">+8,960</td>
+        </tr>
+        <tr>
+          <td class="tc">28</td>
+          <td class="tc">🔻 Short</td>
+          <td>11:18:43</td>
+          <td class="tr">4,301.8</td>
+          <td>11:18:59</td>
+          <td class="tr">4,298.8</td>
+          <td class="tc">16秒</td>
+          <td class="tr" style="color:#26a69a;font-weight:600">+300</td>
+          <td class="tr" style="color:#26a69a">+9,260</td>
+        </tr>
+        <tr>
+          <td class="tc">29</td>
+          <td class="tc">🔺 Long</td>
+          <td>11:24:48</td>
+          <td class="tr">4,307.0</td>
+          <td>11:25:48</td>
+          <td class="tr">4,303.0</td>
+          <td class="tc">1分0秒</td>
+          <td class="tr" style="color:#ef5350;font-weight:600">-400</td>
+          <td class="tr" style="color:#26a69a">+8,860</td>
+        </tr></tbody>
+  </table>
+</div>
+
+<p class="sec-title">▌ 分析コメント</p>
+<div class="analysis">
+  <h2>全体総評</h2>
+  <p>本日前場のIHI (7013) 信用デイトレードは<span class="hl">29トレード、勝率69%、総利益+8,860円</span>（税引前・手数料除く）と堅調な結果。
+  プロフィットファクター3.31は高水準で、スキャルピングとして優秀な成績。</p>
+
+  <h2>相場環境と取引パターン</h2>
+  <p>IHIは前場を通じて<span class="hl">4,237〜4,390円</span>のレンジで推移。
+  ①9時台：寄付き後の急騰に乗ったLong偏重。②10時前半：4,360〜4,390の高値圏での往来後に下落転換を察知してShortシフト。
+  ③10時後半：下値圏4,260〜4,290でのショートは方向感が合わず3連敗（-1,150円）。④11時台：反発ロングで+2,300円を獲得して締め。</p>
+
+  <h2>改善ポイント</h2>
+  <ul>
+    <li>10:53〜10:59の下値圏ショート3連敗（計-1,150円）：下落の勢い鈍化・反転局面でのショート継続。出来高縮小・上ヒゲ確認後にエントリーを絞ると改善可能。</li>
+    <li>9:35の高値圏逆張りロング（4,338→4,328 = -1,000円）：急騰末期の高値掴み。上位足での過熱確認が有効。</li>
+    <li>プロフィットファクター3.31・勝率69%は良好。ロット増量（200株）によるスケールアップも合理的。</li>
+  </ul>
+</div>
+
+<footer>GT-SOAR Analysis System ｜ 2026-02-20 ｜ Data: yfinance (1m→3m) / SBI証券 信用明細</footer>
+
+<script>
+// ─── データ ─────────────────────────────────────────────────────────────────
+const ts     = ["2026-02-20 09:03:00", "2026-02-20 09:06:00", "2026-02-20 09:09:00", "2026-02-20 09:12:00", "2026-02-20 09:15:00", "2026-02-20 09:18:00", "2026-02-20 09:21:00", "2026-02-20 09:24:00", "2026-02-20 09:27:00", "2026-02-20 09:30:00", "2026-02-20 09:33:00", "2026-02-20 09:36:00", "2026-02-20 09:39:00", "2026-02-20 09:42:00", "2026-02-20 09:45:00", "2026-02-20 09:48:00", "2026-02-20 09:51:00", "2026-02-20 09:54:00", "2026-02-20 09:57:00", "2026-02-20 10:00:00", "2026-02-20 10:03:00", "2026-02-20 10:06:00", "2026-02-20 10:09:00", "2026-02-20 10:12:00", "2026-02-20 10:15:00", "2026-02-20 10:18:00", "2026-02-20 10:21:00", "2026-02-20 10:24:00", "2026-02-20 10:27:00", "2026-02-20 10:30:00", "2026-02-20 10:33:00", "2026-02-20 10:36:00", "2026-02-20 10:39:00", "2026-02-20 10:42:00", "2026-02-20 10:45:00", "2026-02-20 10:48:00", "2026-02-20 10:51:00", "2026-02-20 10:54:00", "2026-02-20 10:57:00", "2026-02-20 11:00:00", "2026-02-20 11:03:00", "2026-02-20 11:06:00", "2026-02-20 11:09:00", "2026-02-20 11:12:00", "2026-02-20 11:15:00", "2026-02-20 11:18:00", "2026-02-20 11:21:00", "2026-02-20 11:24:00", "2026-02-20 11:27:00"];
+const opens  = [4239.0, 4256.0, 4258.0, 4288.0, 4269.0, 4274.0, 4276.0, 4288.0, 4303.0, 4308.0, 4309.0, 4338.0, 4329.0, 4318.0, 4324.0, 4319.0, 4307.0, 4316.0, 4361.0, 4351.0, 4370.0, 4374.0, 4364.0, 4377.0, 4377.0, 4384.0, 4356.0, 4355.0, 4365.0, 4353.0, 4334.0, 4308.0, 4319.0, 4319.0, 4306.0, 4284.0, 4285.0, 4268.0, 4261.0, 4272.0, 4291.0, 4308.0, 4311.0, 4306.0, 4310.0, 4307.0, 4305.0, 4308.0, 4305.0];
+const highs  = [4258.0, 4267.0, 4307.0, 4295.0, 4278.0, 4294.0, 4294.0, 4304.0, 4316.0, 4318.0, 4340.0, 4339.0, 4333.0, 4328.0, 4336.0, 4323.0, 4318.0, 4367.0, 4367.0, 4393.0, 4380.0, 4380.0, 4379.0, 4380.0, 4392.0, 4384.0, 4363.0, 4366.0, 4366.0, 4355.0, 4335.0, 4320.0, 4331.0, 4322.0, 4306.0, 4300.0, 4286.0, 4274.0, 4272.0, 4292.0, 4312.0, 4313.0, 4312.0, 4313.0, 4314.0, 4309.0, 4309.0, 4310.0, 4314.0];
+const lows   = [4237.0, 4241.0, 4256.0, 4261.0, 4265.0, 4266.0, 4270.0, 4282.0, 4300.0, 4303.0, 4304.0, 4326.0, 4311.0, 4313.0, 4318.0, 4305.0, 4303.0, 4312.0, 4351.0, 4342.0, 4362.0, 4363.0, 4363.0, 4370.0, 4374.0, 4349.0, 4352.0, 4349.0, 4350.0, 4332.0, 4306.0, 4299.0, 4313.0, 4304.0, 4282.0, 4280.0, 4263.0, 4260.0, 4257.0, 4272.0, 4285.0, 4297.0, 4298.0, 4305.0, 4305.0, 4296.0, 4293.0, 4301.0, 4300.0];
+const cls    = [4256.0, 4257.0, 4287.0, 4267.0, 4275.0, 4276.0, 4288.0, 4302.0, 4308.0, 4309.0, 4337.0, 4328.0, 4317.0, 4324.0, 4319.0, 4307.0, 4317.0, 4360.0, 4351.0, 4370.0, 4374.0, 4365.0, 4376.0, 4376.0, 4384.0, 4357.0, 4354.0, 4365.0, 4354.0, 4333.0, 4309.0, 4318.0, 4320.0, 4306.0, 4285.0, 4285.0, 4268.0, 4260.0, 4270.0, 4291.0, 4308.0, 4310.0, 4306.0, 4310.0, 4308.0, 4306.0, 4309.0, 4304.0, 4309.0];
+const vols   = [318300, 564900, 1140400, 555200, 328300, 454600, 340900, 655300, 536700, 442800, 708700, 333300, 459400, 248300, 382600, 269200, 237900, 1198600, 362600, 749500, 449000, 275300, 260700, 291500, 526400, 431900, 179600, 209200, 142000, 247200, 276900, 497400, 252800, 180700, 287200, 239800, 307100, 269500, 179300, 281600, 260100, 203100, 180200, 117600, 120600, 203900, 178300, 69500, 141200];
+
+// マーカー（4種類・エントリーは大きく・エグジットは小さく）
+const buyEntryT  = ["2026-02-20 09:22:22", "2026-02-20 09:26:56", "2026-02-20 09:33:03", "2026-02-20 09:33:40", "2026-02-20 09:35:38", "2026-02-20 09:37:30", "2026-02-20 09:38:08", "2026-02-20 09:44:07", "2026-02-20 09:55:28", "2026-02-20 10:01:12", "2026-02-20 10:01:45", "2026-02-20 10:11:42", "2026-02-20 10:15:37", "2026-02-20 10:39:22", "2026-02-20 11:00:15", "2026-02-20 11:03:04", "2026-02-20 11:15:32", "2026-02-20 11:24:48"];   // 買建
+const buyEntryP  = [4278.0, 4302.0, 4309.0, 4321.0, 4338.0, 4334.0, 4335.0, 4320.3, 4336.0, 4366.0, 4377.0, 4377.0, 4382.0, 4321.0, 4278.0, 4290.0, 4311.0, 4307.0];
+const buyEntryTip= ["\u8cb7\u5efa 09:22:22<br>@4,278.0\u5186", "\u8cb7\u5efa 09:26:56<br>@4,302.0\u5186", "\u8cb7\u5efa 09:33:03<br>@4,309.0\u5186", "\u8cb7\u5efa 09:33:40<br>@4,321.0\u5186", "\u8cb7\u5efa 09:35:38<br>@4,338.0\u5186", "\u8cb7\u5efa 09:37:30<br>@4,334.0\u5186", "\u8cb7\u5efa 09:38:08<br>@4,335.0\u5186", "\u8cb7\u5efa 09:44:07<br>@4,320.3\u5186", "\u8cb7\u5efa 09:55:28<br>@4,336.0\u5186", "\u8cb7\u5efa 10:01:12<br>@4,366.0\u5186", "\u8cb7\u5efa 10:01:45<br>@4,377.0\u5186", "\u8cb7\u5efa 10:11:42<br>@4,377.0\u5186", "\u8cb7\u5efa 10:15:37<br>@4,382.0\u5186", "\u8cb7\u5efa 10:39:22<br>@4,321.0\u5186", "\u8cb7\u5efa 11:00:15<br>@4,278.0\u5186", "\u8cb7\u5efa 11:03:04<br>@4,290.0\u5186", "\u8cb7\u5efa 11:15:32<br>@4,311.0\u5186", "\u8cb7\u5efa 11:24:48<br>@4,307.0\u5186"];
+const sellEntryT = ["2026-02-20 10:19:27", "2026-02-20 10:30:40", "2026-02-20 10:32:39", "2026-02-20 10:35:35", "2026-02-20 10:44:11", "2026-02-20 10:46:36", "2026-02-20 10:48:05", "2026-02-20 10:50:08", "2026-02-20 10:53:26", "2026-02-20 10:56:58", "2026-02-20 11:18:43"];  // 売建
+const sellEntryP = [4361.0, 4351.0, 4336.0, 4309.0, 4315.9, 4295.0, 4283.0, 4291.0, 4265.0, 4262.0, 4301.8];
+const sellEntryTip=["\u58f2\u5efa 10:19:27<br>@4,361.0\u5186", "\u58f2\u5efa 10:30:40<br>@4,351.0\u5186", "\u58f2\u5efa 10:32:39<br>@4,336.0\u5186", "\u58f2\u5efa 10:35:35<br>@4,309.0\u5186", "\u58f2\u5efa 10:44:11<br>@4,315.9\u5186", "\u58f2\u5efa 10:46:36<br>@4,295.0\u5186", "\u58f2\u5efa 10:48:05<br>@4,283.0\u5186", "\u58f2\u5efa 10:50:08<br>@4,291.0\u5186", "\u58f2\u5efa 10:53:26<br>@4,265.0\u5186", "\u58f2\u5efa 10:56:58<br>@4,262.0\u5186", "\u58f2\u5efa 11:18:43<br>@4,301.8\u5186"];
+const buyExitT   = ["2026-02-20 10:19:56", "2026-02-20 10:31:22", "2026-02-20 10:32:53", "2026-02-20 10:36:27", "2026-02-20 10:45:12", "2026-02-20 10:47:30", "2026-02-20 10:48:27", "2026-02-20 10:51:30", "2026-02-20 10:54:36", "2026-02-20 10:59:34", "2026-02-20 11:18:59"];    // 買埋
+const buyExitP   = [4350.0, 4347.0, 4332.0, 4307.0, 4301.0, 4290.0, 4287.9, 4285.6, 4268.6, 4265.0, 4298.8];
+const buyExitTip = ["\u8cb7\u57cb 10:19:56<br>@4,350.0\u5186<br>\u640d\u76ca: +1,100\u5186", "\u8cb7\u57cb 10:31:22<br>@4,347.0\u5186<br>\u640d\u76ca: +400\u5186", "\u8cb7\u57cb 10:32:53<br>@4,332.0\u5186<br>\u640d\u76ca: +400\u5186", "\u8cb7\u57cb 10:36:27<br>@4,307.0\u5186<br>\u640d\u76ca: +200\u5186", "\u8cb7\u57cb 10:45:12<br>@4,301.0\u5186<br>\u640d\u76ca: +1,490\u5186", "\u8cb7\u57cb 10:47:30<br>@4,290.0\u5186<br>\u640d\u76ca: +500\u5186", "\u8cb7\u57cb 10:48:27<br>@4,287.9\u5186<br>\u640d\u76ca: -490\u5186", "\u8cb7\u57cb 10:51:30<br>@4,285.6\u5186<br>\u640d\u76ca: +540\u5186", "\u8cb7\u57cb 10:54:36<br>@4,268.6\u5186<br>\u640d\u76ca: -360\u5186", "\u8cb7\u57cb 10:59:34<br>@4,265.0\u5186<br>\u640d\u76ca: -300\u5186", "\u8cb7\u57cb 11:18:59<br>@4,298.8\u5186<br>\u640d\u76ca: +300\u5186"];
+const sellExitT  = ["2026-02-20 09:24:28", "2026-02-20 09:27:19", "2026-02-20 09:33:22", "2026-02-20 09:34:07", "2026-02-20 09:36:37", "2026-02-20 09:37:43", "2026-02-20 09:38:25", "2026-02-20 09:47:41", "2026-02-20 09:57:17", "2026-02-20 10:01:23", "2026-02-20 10:02:54", "2026-02-20 10:14:10", "2026-02-20 10:18:00", "2026-02-20 10:39:58", "2026-02-20 11:01:54", "2026-02-20 11:04:52", "2026-02-20 11:17:13", "2026-02-20 11:25:48"];   // 売埋
+const sellExitP  = [4287.0, 4304.0, 4315.0, 4330.0, 4328.0, 4337.6, 4331.3, 4320.0, 4355.0, 4369.0, 4373.0, 4378.0, 4383.0, 4322.0, 4288.0, 4303.0, 4306.2, 4303.0];
+const sellExitTip= ["\u58f2\u57cb 09:24:28<br>@4,287.0\u5186<br>\u640d\u76ca: +900\u5186", "\u58f2\u57cb 09:27:19<br>@4,304.0\u5186<br>\u640d\u76ca: +200\u5186", "\u58f2\u57cb 09:33:22<br>@4,315.0\u5186<br>\u640d\u76ca: +600\u5186", "\u58f2\u57cb 09:34:07<br>@4,330.0\u5186<br>\u640d\u76ca: +900\u5186", "\u58f2\u57cb 09:36:37<br>@4,328.0\u5186<br>\u640d\u76ca: -1,000\u5186", "\u58f2\u57cb 09:37:43<br>@4,337.6\u5186<br>\u640d\u76ca: +360\u5186", "\u58f2\u57cb 09:38:25<br>@4,331.3\u5186<br>\u640d\u76ca: -370\u5186", "\u58f2\u57cb 09:47:41<br>@4,320.0\u5186<br>\u640d\u76ca: -30\u5186", "\u58f2\u57cb 09:57:17<br>@4,355.0\u5186<br>\u640d\u76ca: +1,900\u5186", "\u58f2\u57cb 10:01:23<br>@4,369.0\u5186<br>\u640d\u76ca: +300\u5186", "\u58f2\u57cb 10:02:54<br>@4,373.0\u5186<br>\u640d\u76ca: -400\u5186", "\u58f2\u57cb 10:14:10<br>@4,378.0\u5186<br>\u640d\u76ca: +100\u5186", "\u58f2\u57cb 10:18:00<br>@4,383.0\u5186<br>\u640d\u76ca: +100\u5186", "\u58f2\u57cb 10:39:58<br>@4,322.0\u5186<br>\u640d\u76ca: +100\u5186", "\u58f2\u57cb 11:01:54<br>@4,288.0\u5186<br>\u640d\u76ca: +1,000\u5186", "\u58f2\u57cb 11:04:52<br>@4,303.0\u5186<br>\u640d\u76ca: +1,300\u5186", "\u58f2\u57cb 11:17:13<br>@4,306.2\u5186<br>\u640d\u76ca: -480\u5186", "\u58f2\u57cb 11:25:48<br>@4,303.0\u5186<br>\u640d\u76ca: -400\u5186"];
+
+const annotations = [{"x": "2026-02-20 09:24:28", "y": 4287.0, "xref": "x", "yref": "y", "text": "+900", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 09:27:19", "y": 4304.0, "xref": "x", "yref": "y", "text": "+200", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 09:33:22", "y": 4315.0, "xref": "x", "yref": "y", "text": "+600", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 09:34:07", "y": 4330.0, "xref": "x", "yref": "y", "text": "+900", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 09:36:37", "y": 4328.0, "xref": "x", "yref": "y", "text": "-1,000", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}, {"x": "2026-02-20 09:37:43", "y": 4337.6, "xref": "x", "yref": "y", "text": "+360", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 09:38:25", "y": 4331.3, "xref": "x", "yref": "y", "text": "-370", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}, {"x": "2026-02-20 09:47:41", "y": 4320.0, "xref": "x", "yref": "y", "text": "-30", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}, {"x": "2026-02-20 09:57:17", "y": 4355.0, "xref": "x", "yref": "y", "text": "+1,900", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 10:01:23", "y": 4369.0, "xref": "x", "yref": "y", "text": "+300", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 10:02:54", "y": 4373.0, "xref": "x", "yref": "y", "text": "-400", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}, {"x": "2026-02-20 10:14:10", "y": 4378.0, "xref": "x", "yref": "y", "text": "+100", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 10:18:00", "y": 4383.0, "xref": "x", "yref": "y", "text": "+100", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 10:19:56", "y": 4350.0, "xref": "x", "yref": "y", "text": "+1,100", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:31:22", "y": 4347.0, "xref": "x", "yref": "y", "text": "+400", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:32:53", "y": 4332.0, "xref": "x", "yref": "y", "text": "+400", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:36:27", "y": 4307.0, "xref": "x", "yref": "y", "text": "+200", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:39:58", "y": 4322.0, "xref": "x", "yref": "y", "text": "+100", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 10:45:12", "y": 4301.0, "xref": "x", "yref": "y", "text": "+1,490", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:47:30", "y": 4290.0, "xref": "x", "yref": "y", "text": "+500", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:48:27", "y": 4287.9, "xref": "x", "yref": "y", "text": "-490", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": -14}, {"x": "2026-02-20 10:51:30", "y": 4285.6, "xref": "x", "yref": "y", "text": "+540", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 10:54:36", "y": 4268.6, "xref": "x", "yref": "y", "text": "-360", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": -14}, {"x": "2026-02-20 10:59:34", "y": 4265.0, "xref": "x", "yref": "y", "text": "-300", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": -14}, {"x": "2026-02-20 11:01:54", "y": 4288.0, "xref": "x", "yref": "y", "text": "+1,000", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 11:04:52", "y": 4303.0, "xref": "x", "yref": "y", "text": "+1,300", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": 14}, {"x": "2026-02-20 11:17:13", "y": 4306.2, "xref": "x", "yref": "y", "text": "-480", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}, {"x": "2026-02-20 11:18:59", "y": 4298.8, "xref": "x", "yref": "y", "text": "+300", "showarrow": false, "font": {"size": 9, "color": "#26a69a"}, "yshift": -14}, {"x": "2026-02-20 11:25:48", "y": 4303.0, "xref": "x", "yref": "y", "text": "-400", "showarrow": false, "font": {"size": 9, "color": "#ef5350"}, "yshift": 14}];
+const cumTimes    = ["2026-02-20 09:24:28", "2026-02-20 09:27:19", "2026-02-20 09:33:22", "2026-02-20 09:34:07", "2026-02-20 09:36:37", "2026-02-20 09:37:43", "2026-02-20 09:38:25", "2026-02-20 09:47:41", "2026-02-20 09:57:17", "2026-02-20 10:01:23", "2026-02-20 10:02:54", "2026-02-20 10:14:10", "2026-02-20 10:18:00", "2026-02-20 10:19:56", "2026-02-20 10:31:22", "2026-02-20 10:32:53", "2026-02-20 10:36:27", "2026-02-20 10:39:58", "2026-02-20 10:45:12", "2026-02-20 10:47:30", "2026-02-20 10:48:27", "2026-02-20 10:51:30", "2026-02-20 10:54:36", "2026-02-20 10:59:34", "2026-02-20 11:01:54", "2026-02-20 11:04:52", "2026-02-20 11:17:13", "2026-02-20 11:18:59", "2026-02-20 11:25:48"];
+const cumValues   = [900, 1100, 1700, 2600, 1600, 1960, 1590, 1560, 3460, 3760, 3360, 3460, 3560, 4660, 5060, 5460, 5660, 5760, 7250, 7750, 7260, 7800, 7440, 7140, 8140, 9440, 8960, 9260, 8860];
+
+// ─── メインチャート ──────────────────────────────────────────────────────────
+const candle = {
+  type: 'candlestick',
+  x: ts, open: opens, high: highs, low: lows, close: cls,
+  name: 'IHI 3分足',
+  increasing: { line: {color:'#26a69a', width:1}, fillcolor:'#26a69a' },
+  decreasing: { line: {color:'#ef5350', width:1}, fillcolor:'#ef5350' },
+  yaxis: 'y',
+  hoverinfo: 'x+y',
+};
+const volBar = {
+  type: 'bar', x: ts, y: vols, name: '出来高',
+  marker: { color: ts.map((_,i) => cls[i]>=opens[i]
+    ? 'rgba(38,166,154,0.45)' : 'rgba(239,83,80,0.45)') },
+  yaxis: 'y2', hoverinfo: 'x+y',
+};
+
+// 買建（Long IN）: 緑 大きい▲ 下寄せ
+const mkBuyEntry = {
+  type:'scatter', mode:'markers', name:'買建 Long IN',
+  x: buyEntryT, y: buyEntryP,
+  text: buyEntryTip,
+  hoverinfo: 'text',
+  marker: { symbol:'triangle-up', size:14, color:'#00e676',
+             line:{color:'#003300', width:1} },
+  yaxis: 'y',
+};
+// 売埋（Long OUT）: 赤 小さい▽ 上寄せ
+const mkSellExit = {
+  type:'scatter', mode:'markers', name:'売埋 Long OUT',
+  x: sellExitT, y: sellExitP,
+  text: sellExitTip,
+  hoverinfo: 'text',
+  marker: { symbol:'triangle-down-open', size:11, color:'#ff5252',
+             line:{color:'#ff5252', width:2} },
+  yaxis: 'y',
+};
+// 売建（Short IN）: 赤 大きい▼ 上寄せ
+const mkSellEntry = {
+  type:'scatter', mode:'markers', name:'売建 Short IN',
+  x: sellEntryT, y: sellEntryP,
+  text: sellEntryTip,
+  hoverinfo: 'text',
+  marker: { symbol:'triangle-down', size:14, color:'#ff5252',
+             line:{color:'#330000', width:1} },
+  yaxis: 'y',
+};
+// 買埋（Short OUT）: 緑 小さい△ 下寄せ
+const mkBuyExit = {
+  type:'scatter', mode:'markers', name:'買埋 Short OUT',
+  x: buyExitT, y: buyExitP,
+  text: buyExitTip,
+  hoverinfo: 'text',
+  marker: { symbol:'triangle-up-open', size:11, color:'#00e676',
+             line:{color:'#00e676', width:2} },
+  yaxis: 'y',
+};
+
+const layout = {
+  paper_bgcolor: '#1e2130',
+  plot_bgcolor:  '#1e2130',
+  font: { color:'#b0bec5', size:11 },
+  margin: { t:16, b:8, l:10, r:65 },
+  showlegend: true,
+  legend: {
+    bgcolor:'rgba(20,23,40,0.9)', bordercolor:'#3d4261', borderwidth:1,
+    x:0.01, y:0.99, orientation:'h', font:{size:10},
+    xanchor:'left', yanchor:'top',
+  },
+  xaxis: {
+    type: 'date',
+    tickformat: '%H:%M',
+    gridcolor: 'rgba(42,45,62,0.8)',
+    zerolinecolor: '#2a2d3e',
+    tickfont: { size:10 },
+    range: ['2026-02-20 09:00:00', '2026-02-20 11:30:00'],
+    dtick: 5 * 60 * 1000,  // 5分ごとにtick
+    rangeslider: { visible: false },
+  },
+  yaxis: {
+    title: { text:'価格 (円)', font:{size:10} },
+    side: 'right',
+    gridcolor: 'rgba(42,45,62,0.6)',
+    zerolinecolor: '#2a2d3e',
+    tickformat: ',.0f',
+    domain: [0.20, 1.0],
+  },
+  yaxis2: {
+    title: { text:'出来高', font:{size:10} },
+    side: 'left',
+    gridcolor: 'rgba(42,45,62,0.2)',
+    domain: [0, 0.16],
+  },
+  annotations: annotations,
+  height: 640,
+};
+
+Plotly.newPlot('mainChart',
+  [candle, volBar, mkBuyEntry, mkSellExit, mkSellEntry, mkBuyExit],
+  layout, { responsive:true, displayModeBar:false });
+
+// ─── 累積損益チャート ─────────────────────────────────────────────────────────
+const cumTrace = {
+  type:'scatter', mode:'lines+markers',
+  x: cumTimes, y: cumValues, name:'累積損益',
+  line: { color:'#ffd54f', width:2.5 },
+  marker: { color: cumValues.map(v => v>=0?'#26a69a':'#ef5350'), size:8 },
+  fill: 'tozeroy', fillcolor: 'rgba(255,213,79,0.07)',
+  hovertemplate: '%{x|%H:%M}<br>累積損益: %{y:+,}円<extra></extra>',
+};
+const zeroLine = {
+  type:'scatter', mode:'lines',
+  x: [cumTimes[0], cumTimes[cumTimes.length-1]], y: [0,0],
+  line: { color:'#546e7a', width:1, dash:'dash' },
+  hoverinfo: 'skip', showlegend:false,
+};
+Plotly.newPlot('pnlChart', [zeroLine, cumTrace], {
+  paper_bgcolor:'#1e2130', plot_bgcolor:'#1e2130',
+  font: { color:'#b0bec5', size:10.5 },
+  margin: { t:14, b:50, l:70, r:20 },
+  showlegend: false, height: 220,
+  xaxis: {
+    type: 'date', tickformat: '%H:%M',
+    gridcolor: 'rgba(42,45,62,0.7)',
+    range: ['2026-02-20 09:00:00', '2026-02-20 11:30:00'],
+    dtick: 10 * 60 * 1000,
+    tickfont: { size:9 },
+  },
+  yaxis: {
+    title: { text:'累積損益 (円)', font:{size:10} },
+    gridcolor: 'rgba(42,45,62,0.6)',
+    tickformat: '+,d',
+  },
+}, { responsive:true, displayModeBar:false });
+</script>
+</body>
+</html>

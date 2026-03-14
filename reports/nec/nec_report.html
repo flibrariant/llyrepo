@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEC (6701) 短期トレード戦略レポート</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --primary: #1a56db;
+    --primary-light: #e8eefb;
+    --accent: #0ea5e9;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --amber: #f59e0b;
+    --amber-light: #fef3c7;
+    --text: #1e293b;
+    --text-sub: #64748b;
+    --border: #e2e8f0;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN","Noto Sans JP","Segoe UI",sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1a56db 50%, #0ea5e9 100%);
+    color: #fff;
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.12) 0%, transparent 60%);
+  }
+  .hero h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: .02em;
+    position: relative; z-index: 1;
+  }
+  .hero .sub {
+    margin-top: 8px;
+    font-size: .95rem;
+    opacity: .85;
+    position: relative; z-index: 1;
+  }
+  .hero .date-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 16px;
+    background: rgba(255,255,255,.18);
+    border-radius: 999px;
+    font-size: .82rem;
+    backdrop-filter: blur(4px);
+    position: relative; z-index: 1;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ── Verdict banner ── */
+  .verdict {
+    margin: -32px auto 36px;
+    max-width: 960px;
+    padding: 0 20px;
+    position: relative; z-index: 2;
+  }
+  .verdict-inner {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 32px 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width:700px) {
+    .verdict-inner { grid-template-columns: 1fr 1fr; }
+  }
+  .v-item { text-align: center; }
+  .v-label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+  }
+  .v-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  .v-value.watch { color: var(--amber); }
+  .v-value.ok { color: var(--green); }
+  .v-value.danger { color: var(--red); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+  .card h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+  }
+  .card .lead {
+    color: var(--text-sub);
+    font-size: .88rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* ── Tables ── */
+  .tbl-wrap { overflow-x: auto; margin: 16px -8px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+  }
+  thead th {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--primary);
+  }
+  thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
+  td {
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight { background: #f0f7ff; }
+  tr.highlight td:first-child { position: relative; }
+  tr.highlight td:first-child::before {
+    content: "★";
+    margin-right: 4px;
+    color: var(--amber);
+  }
+
+  .good { color: var(--green); font-weight: 600; }
+  .bad { color: var(--red); font-weight: 600; }
+  .neutral { color: var(--amber); font-weight: 600; }
+
+  /* ── Pill badges ── */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .pill-green { background: var(--green-light); color: #065f46; }
+  .pill-red { background: var(--red-light); color: #991b1b; }
+  .pill-amber { background: var(--amber-light); color: #92400e; }
+
+  /* ── Tip box ── */
+  .tip {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: .88rem;
+    line-height: 1.7;
+  }
+  .tip strong { color: var(--primary); }
+  .tip-amber {
+    background: #fffbeb;
+    border-left-color: var(--amber);
+  }
+  .tip-amber strong { color: #92400e; }
+  .tip-red {
+    background: #fef2f2;
+    border-left-color: var(--red);
+  }
+  .tip-red strong { color: #991b1b; }
+
+  /* ── Chart containers ── */
+  .chart-box {
+    position: relative;
+    width: 100%;
+    max-height: 340px;
+    margin: 16px 0;
+  }
+
+  /* ── Rule block ── */
+  .rule-block {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 14px 0;
+    font-size: .88rem;
+  }
+  .rule-block h4 {
+    font-size: .92rem;
+    margin-bottom: 8px;
+    color: var(--primary);
+  }
+  .rule-block ul { padding-left: 1.2em; }
+  .rule-block li { margin-bottom: 4px; }
+  .rule-block .num {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── Two-col grid ── */
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width:640px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ── Scenario cards ── */
+  .scenario {
+    border-radius: 12px;
+    padding: 20px 22px;
+    font-size: .88rem;
+  }
+  .scenario.bull { background: var(--green-light); }
+  .scenario.base { background: var(--amber-light); }
+  .scenario.bear { background: var(--red-light); }
+  .scenario h4 { margin-bottom: 6px; font-size: .95rem; }
+
+  /* ── Timeline ── */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px; top: 4px; bottom: 4px;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 18px;
+    font-size: .88rem;
+  }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -24px; top: 7px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--primary-light);
+  }
+  .tl-date {
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 32px 20px;
+    font-size: .78rem;
+    color: var(--text-sub);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* ── Glossary ── */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width:640px) { .glossary-grid { grid-template-columns: 1fr; } }
+  .g-item {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: .84rem;
+  }
+  .g-item dt {
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .g-item dd { color: var(--text-sub); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ━━ Hero ━━ -->
+<header class="hero">
+  <h1>NEC (6701) 短期トレード戦略レポート</h1>
+  <p class="sub">信用買い 40営業日保有・+10%利確シナリオの定量分析</p>
+  <span class="date-badge">分析基準日 2026-02-18 ／ 直近終値 4,004 円</span>
+</header>
+
+<!-- ━━ Verdict ━━ -->
+<div class="verdict">
+  <div class="verdict-inner">
+    <div class="v-item">
+      <div class="v-label">総合判定</div>
+      <div class="v-value watch">様子見 → 反転確認後</div>
+    </div>
+    <div class="v-item">
+      <div class="v-label">推奨戦略</div>
+      <div class="v-value">B（逆張り型）</div>
+    </div>
+    <div class="v-item">
+      <div class="v-label">推奨損切り</div>
+      <div class="v-value ok">−5 %（3,800円）</div>
+    </div>
+    <div class="v-item">
+      <div class="v-label">想定勝率レンジ</div>
+      <div class="v-value">25 〜 55 %</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ━━ ① この分析の読み方 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#eff6ff;color:var(--primary)">📖</span> この分析の読み方（はじめに）</h2>
+  <p class="lead">
+    「勝率」「期待値」などの言葉がたくさん出てきます。<br>
+    ここではレポートを読むうえで必要な用語を、高校の数学レベルで解説します。
+  </p>
+
+  <div class="glossary-grid">
+    <dl class="g-item">
+      <dt>勝率（Win Rate）</dt>
+      <dd>「同じルールで100回やったら、何回 +10% に届くか」の割合。
+          コイン投げの表が出る確率と同じ考え方です。</dd>
+    </dl>
+    <dl class="g-item">
+      <dt>期待値（Expected Value）</dt>
+      <dd>「1回のトレードで平均いくら儲かる／損するか」。
+          期待値＝勝つ確率×勝ち額＋負ける確率×負け額。
+          <strong>プラスなら「やればやるほど得する」ルール</strong>です。</dd>
+    </dl>
+    <dl class="g-item">
+      <dt>損切り（Stop Loss / SL）</dt>
+      <dd>「これ以上下がったら諦めて売る」ライン。
+          損失を限定するための安全弁です。</dd>
+    </dl>
+    <dl class="g-item">
+      <dt>最大ドローダウン（Max DD）</dt>
+      <dd>保有中に「買値からどれだけ下がったか」の最悪記録。
+          含み損に耐えられるか判断するのに使います。</dd>
+    </dl>
+    <dl class="g-item">
+      <dt>バックテスト</dt>
+      <dd>過去の株価データを使い、「もし同じルールで売買していたら」を
+          シミュレーションすること。<strong>未来を保証するものではない</strong>点に注意。</dd>
+    </dl>
+    <dl class="g-item">
+      <dt>モンテカルロ・シミュレーション</dt>
+      <dd>サイコロを10万回振るように、乱数で株価の動きを大量に生成して確率を計算する手法。
+          「今のトレンドが続いたらどうなるか」を推定します。</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ━━ ② いまNECはどんな状態？ ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#fef3c7;color:#92400e">⚡</span> いまNECはどんな状態？</h2>
+  <p class="lead">直近5営業日で約17%下落。ボラティリティ（値動きの荒さ）は通常の2〜3倍に達しています。</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>指標</th><th>値</th><th>ひとこと評価</th></tr></thead>
+      <tbody>
+        <tr><td>直近終値</td><td>4,004 円</td><td>エントリー候補帯にちょうど到達</td></tr>
+        <tr><td>5日間騰落</td><td class="bad">−17.2 %</td><td>急落局面</td></tr>
+        <tr><td>RSI（14日）</td><td class="bad">23.9</td><td>「売られ過ぎ」ゾーン（30以下）</td></tr>
+        <tr><td>ATR（14日）</td><td class="neutral">287 円（7.2%）</td><td>1日の平均値幅が大きい＝荒い相場</td></tr>
+        <tr><td>20日 年率ボラ</td><td class="bad">75.2 %</td><td>通常の2〜3倍</td></tr>
+        <tr><td>日次最大下落（20日）</td><td class="bad">−11.79 %</td><td>1日で-3%SLを大幅突破する実績あり</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip tip-amber">
+    <strong>RSI 23.9 とは？</strong><br>
+    RSI は「0〜100」で株の売られ具合を測る指標。30以下は「売られ過ぎ」とされ、
+    反発しやすいサインです。ただし急落局面ではRSIが低いまま下がり続けることもあり、
+    <strong>RSIだけを根拠にエントリーするのは危険</strong>です。
+  </div>
+</section>
+
+<!-- ━━ ③ 4,000円帯は支えになるか？ ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#d1fae5;color:#065f46">🛡</span> 4,000円帯は「支え」になるか？</h2>
+  <p class="lead">
+    過去3年で株価が4,000円付近（3,980〜4,020円）を通った回数とその後の動きを調べました。
+  </p>
+
+  <div class="grid2">
+    <div class="chart-box" style="max-height:280px">
+      <canvas id="chartSupport"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:10px">
+      <div class="rule-block" style="margin:0">
+        <h4>タッチ 15回</h4>
+        <ul>
+          <li><span class="good">反発成功 6回（40%）</span> — 終値が4,020円より上に戻った</li>
+          <li><span class="bad">下抜け 2回（13%）</span> — 終値が3,980円を割った</li>
+          <li><span class="neutral">帯内滞留 7回（47%）</span> — どちらとも言えない動き</li>
+        </ul>
+      </div>
+      <div class="tip" style="margin:0">
+        <strong>判定：</strong>
+        4,000円は「ある程度の支え」ではあるが、出来高の集中度が全体平均の0.96倍と<strong>特に厚くない</strong>。
+        急落局面では下抜けリスクあり。過信は禁物です。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━ ④ 2つの戦略 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#eff6ff;color:var(--primary)">🎯</span> 2つの戦略の定義</h2>
+  <p class="lead">「いつ買うか」のルールが違う2つの戦略をテストしました。</p>
+
+  <div class="grid2">
+    <div class="rule-block">
+      <h4>戦略A — 確認型（5MA上抜け）</h4>
+      <p style="margin-bottom:8px;color:var(--text-sub)">「底打ちのサインが出てから乗る」慎重派</p>
+      <ul>
+        <li>前日の終値が5日移動平均線<strong>以下</strong></li>
+        <li>当日の終値が5日移動平均線を<strong>上抜け</strong></li>
+        <li>当日が<strong>陽線</strong>（終値 &gt; 始値）</li>
+        <li>RSI(14) が <strong>60未満</strong>（過熱でない）</li>
+      </ul>
+      <p style="margin-top:8px;font-size:.82rem;color:var(--text-sub)">→ 翌営業日の寄付で買い</p>
+    </div>
+    <div class="rule-block">
+      <h4>戦略B — 逆張り型（支持帯反発）</h4>
+      <p style="margin-bottom:8px;color:var(--text-sub)">「安値圏で反発の兆しを拾う」攻め派</p>
+      <ul>
+        <li>安値が直近20日安値の<strong>±2%以内</strong>に到達</li>
+        <li><strong>下ヒゲ</strong>がローソク足全体の40%以上</li>
+        <li>翌日が<strong>陽線</strong>で確定</li>
+      </ul>
+      <p style="margin-top:8px;font-size:.82rem;color:var(--text-sub)">→ 翌々営業日の寄付で買い</p>
+    </div>
+  </div>
+
+  <div class="tip">
+    <strong>移動平均線って？</strong><br>
+    「過去○日の終値を平均した線」。5MA＝5日移動平均線。
+    株価がこの線を下から上に突き抜ける（上抜け）と、「下落トレンドが反転し始めたかも」というサインになります。
+  </div>
+</section>
+
+<!-- ━━ ⑤ バックテスト結果 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#e0e7ff;color:#3730a3">📊</span> バックテスト結果（全期間 約3年）</h2>
+  <p class="lead">
+    2023年1月〜2026年2月の日足データで、各戦略×各損切り幅の成績を集計しました。
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>戦略</th>
+          <th>トレード数</th>
+          <th>勝率</th>
+          <th>SLヒット率</th>
+          <th>平均損益</th>
+          <th>期待値</th>
+          <th>最大DD</th>
+          <th>利確<br>平均日数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A（SL −3%）</td>
+          <td>44</td>
+          <td>36.4%</td>
+          <td class="bad">59.1%</td>
+          <td class="good">+2.13%</td>
+          <td class="good">+2.13%</td>
+          <td>−13.0%</td>
+          <td>17.1日</td>
+        </tr>
+        <tr>
+          <td>B（SL −3%）</td>
+          <td>11</td>
+          <td>45.5%</td>
+          <td class="bad">54.5%</td>
+          <td class="good">+2.91%</td>
+          <td class="good">+2.91%</td>
+          <td>−5.0%</td>
+          <td>12.2日</td>
+        </tr>
+        <tr class="highlight">
+          <td>A（SL −5%）</td>
+          <td>44</td>
+          <td class="good">54.5%</td>
+          <td>36.4%</td>
+          <td class="good">+4.08%</td>
+          <td class="good">+4.08%</td>
+          <td>−13.0%</td>
+          <td>18.2日</td>
+        </tr>
+        <tr class="highlight">
+          <td>B（SL −5%）</td>
+          <td>11</td>
+          <td class="good">72.7%</td>
+          <td>27.3%</td>
+          <td class="good">+5.91%</td>
+          <td class="good">+5.91%</td>
+          <td>−5.9%</td>
+          <td>15.8日</td>
+        </tr>
+        <tr>
+          <td>A（SL −6%）</td>
+          <td>44</td>
+          <td>54.5%</td>
+          <td>36.4%</td>
+          <td class="good">+3.72%</td>
+          <td class="good">+3.72%</td>
+          <td>−13.0%</td>
+          <td>18.2日</td>
+        </tr>
+        <tr>
+          <td>B（SL −6%）</td>
+          <td>11</td>
+          <td class="good">72.7%</td>
+          <td>27.3%</td>
+          <td class="good">+5.64%</td>
+          <td class="good">+5.64%</td>
+          <td>−8.7%</td>
+          <td>15.8日</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:320px;margin-top:24px">
+    <canvas id="chartBacktest"></canvas>
+  </div>
+
+  <div class="tip">
+    <strong>表の読み方</strong><br>
+    ★ マークが付いた行（SL −5%）が最もバランスの良い組み合わせ。
+    戦略Bは<strong>勝率72.7%・期待値+5.91%</strong>と好成績ですが、トレード数が11回と少なく統計的な信頼度はやや低い点に注意。
+    戦略Aは44回のトレードがあり、より信頼性が高い数字です。
+  </div>
+</section>
+
+<!-- ━━ ⑤-b 直近1年 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#fef3c7;color:#92400e">🔍</span> 直近1年の成績（レジーム差の確認）</h2>
+  <p class="lead">
+    「最近の相場環境でも同じように勝てるか？」を確認するために、直近1年に限定した成績です。
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>戦略</th><th>トレード数</th><th>勝率</th><th>SLヒット率</th><th>平均損益</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>A-1Y（SL −3%）</td><td>13</td><td>30.8%</td><td class="bad">69.2%</td><td class="good">+1.00%</td></tr>
+        <tr class="highlight"><td>A-1Y（SL −5%）</td><td>13</td><td class="good">53.8%</td><td>46.2%</td><td class="good">+3.08%</td></tr>
+        <tr><td>A-1Y（SL −6%）</td><td>13</td><td>53.8%</td><td>46.2%</td><td class="good">+2.62%</td></tr>
+        <tr><td>B-1Y（SL −5%）</td><td>1</td><td>100%</td><td>0%</td><td class="good">+10.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip tip-amber">
+    <strong>注意：</strong>直近1年の戦略Bは<strong>シグナルが1回だけ</strong>。
+    「1回やったら1回勝った＝勝率100%」ですが、サンプル数が少なすぎて統計的に意味がありません。
+    戦略Aの直近1年の勝率53.8%（SL −5%）がより信頼できる数字です。
+  </div>
+</section>
+
+<!-- ━━ ⑤-c 4000円帯 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#d1fae5;color:#065f46">💰</span> 4,000円帯限定のバックテスト</h2>
+  <p class="lead">
+    終値が3,900〜4,100円だった日にエントリーしたケースだけを抽出した成績です。
+    今回の想定エントリー（4,000円）に最も近い条件です。
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>損切り幅</th><th>トレード数</th><th>勝率</th><th>SLヒット率</th><th>平均損益</th><th>利確平均日数</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>−3 %</td><td>21</td><td>28.6%</td><td class="bad">61.9%</td><td class="good">+0.89%</td><td>6.3日</td></tr>
+        <tr class="highlight"><td>−5 %</td><td>21</td><td class="good">47.6%</td><td>42.9%</td><td class="good">+2.51%</td><td>13.7日</td></tr>
+        <tr><td>−6 %</td><td>21</td><td class="good">61.9%</td><td>28.6%</td><td class="good">+4.37%</td><td>15.2日</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:300px;margin-top:20px">
+    <canvas id="chart4000"></canvas>
+  </div>
+
+  <div class="tip">
+    <strong>この結果が意味すること：</strong><br>
+    4,000円帯でエントリーした場合、<strong>−3%の損切りは厳しすぎる</strong>（62%が損切りに引っかかる）。
+    −5%なら勝率約48%・期待値+2.5%でプラス、−6%なら勝率62%・期待値+4.4%とさらに良いが、
+    1回あたりの損失額が大きくなるトレードオフがあります。
+  </div>
+</section>
+
+<!-- ━━ ⑥ モンテカルロ ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#fce7f3;color:#9d174d">🎲</span> モンテカルロ・シミュレーション（10万回）</h2>
+  <p class="lead">
+    「直近60日の値動きの傾向がこのまま続く場合」にどうなるかを、
+    10万通りの株価パスを生成して確率を出しました。
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>損切り幅</th><th>+10%到達率</th><th>SLヒット率</th><th>時間撤退率</th><th>期待値</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>−3 %</td><td class="bad">13.3%</td><td class="bad">86.7%</td><td>0.0%</td><td class="bad">−1.27%</td></tr>
+        <tr><td>−5 %</td><td class="bad">16.2%</td><td class="bad">83.7%</td><td>0.1%</td><td class="bad">−2.57%</td></tr>
+        <tr><td>−6 %</td><td class="bad">17.4%</td><td class="bad">82.4%</td><td>0.2%</td><td class="bad">−3.21%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:300px;margin-top:20px">
+    <canvas id="chartMC"></canvas>
+  </div>
+
+  <div class="tip tip-red">
+    <strong>なぜバックテストとこんなに違う？</strong><br>
+    モンテカルロは直近60日の日次リターン（<strong>平均 −0.58%/日</strong>）をそのまま使っています。
+    つまり「今の急落トレンドがあと40日続く」という最悪ケースの想定です。<br><br>
+    バックテストは上昇・下降いろいろな局面を含んだ平均値。
+    <strong>実際の勝率はこの2つの間のどこか</strong>になります。<br>
+    → だからこそ「反転を確認してから買う」ことが重要なのです。
+  </div>
+</section>
+
+<!-- ━━ ⑦ 損切り幅の比較 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#fee2e2;color:#991b1b">🔒</span> 損切り幅はどれがベスト？</h2>
+  <p class="lead">3つの損切り案を、建玉200株（約80万円）の場合の実額で比較します。</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>損切り幅</th><th>逆指値</th><th>最大損失</th><th>バックテスト勝率<br>(4K帯)</th><th>評価</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>−3 %（3,880円）</td>
+          <td>3,880円</td>
+          <td>−24,000円</td>
+          <td class="bad">28.6%</td>
+          <td><span class="pill pill-red">不適格</span></td>
+        </tr>
+        <tr class="highlight">
+          <td>−5 %（3,800円）</td>
+          <td>3,800円</td>
+          <td>−40,000円</td>
+          <td class="good">47.6%</td>
+          <td><span class="pill pill-green">推奨</span></td>
+        </tr>
+        <tr>
+          <td>−6 %（3,760円）</td>
+          <td>3,760円</td>
+          <td>−48,000円</td>
+          <td class="good">61.9%</td>
+          <td><span class="pill pill-amber">次善</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>なぜ−5%が推奨？</strong><br>
+    現在のATR（1日の平均値幅）は<strong>287円＝約7.2%</strong>。
+    −3%だと<strong>1日の通常の値動きだけで損切りにかかってしまう</strong>ため使えません。<br>
+    −5%と−6%は勝率・期待値に大きな差がなく、−5%のほうが損失額が小さいため、
+    リスク/リターンのバランスが優れています。
+  </div>
+</section>
+
+<!-- ━━ ⑧ イベントカレンダー ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#eff6ff;color:var(--primary)">📅</span> 今後1〜2か月のイベントカレンダー</h2>
+  <p class="lead">株価に影響しうる主要イベントと、シナリオごとの影響を整理しました。</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <span class="tl-date">2月下旬</span> — 急落後のリバウンド局面<br>
+      <span style="font-size:.84rem;color:var(--text-sub)">RSI 23.9の売られ過ぎからの自律反発が期待できる時期。ただし戻り売り圧力も強い。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">3月13日頃</span> — 米CPI（2月分）<br>
+      <span style="font-size:.84rem;color:var(--text-sub)">インフレ再加速→利下げ後退→グロース株に逆風。鈍化なら追い風。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">3月17〜18日</span> — <strong>FOMC</strong><br>
+      <span style="font-size:.84rem;color:var(--text-sub)">金利据え置き予想。タカ派発言なら円安→NEC中立〜やや追い風。ハト派なら円高リスク。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">3月18〜19日</span> — <strong>日銀金融政策決定会合</strong><br>
+      <span style="font-size:.84rem;color:var(--text-sub)">利上げ観測あり。利上げ→円高→NEC逆風。見送りなら株式市場に安心感。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">3月下旬</span> — 米PCEデフレーター<br>
+      <span style="font-size:.84rem;color:var(--text-sub)">FRBが最も重視するインフレ指標。CPIと同方向の影響。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">4月上旬</span> — NEC新経営体制発足<br>
+      <span style="font-size:.84rem;color:var(--text-sub)">新体制の戦略発表次第でポジティブサプライズの可能性。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">4月28〜29日</span> — FOMC<br>
+      <span style="font-size:.84rem;color:var(--text-sub)">利下げ有無が焦点。利下げなら株高の追い風。</span>
+    </div>
+    <div class="tl-item">
+      <span class="tl-date">4月下旬</span> — <strong>NEC 本決算（2026/3期）</strong><br>
+      <span style="font-size:.84rem;color:var(--text-sub)">最大のカタリスト。受注好調・ガイダンス上方修正なら+10%到達の強い後押し。</span>
+    </div>
+  </div>
+</section>
+
+<!-- ━━ ⑨ シナリオ分析 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#e0e7ff;color:#3730a3">🔮</span> シナリオ別の勝率修正</h2>
+  <p class="lead">「世の中がどう動くか」によって、勝率はこのように変わると推測します。</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:12px">
+    <div class="scenario bull">
+      <h4>🟢 Bull（楽観）</h4>
+      <p style="font-size:.82rem;margin-bottom:6px">SaaS売り一巡＋決算期待で買い戻し</p>
+      <p><strong>確率: 30%</strong></p>
+      <p>勝率 → <span class="good">60〜70%</span></p>
+    </div>
+    <div class="scenario base">
+      <h4>🟡 Base（中立）</h4>
+      <p style="font-size:.82rem;margin-bottom:6px">ボラ収束＋レンジ推移</p>
+      <p><strong>確率: 40%</strong></p>
+      <p>勝率 → <span class="neutral">40〜50%</span></p>
+    </div>
+    <div class="scenario bear">
+      <h4>🔴 Bear（悲観）</h4>
+      <p style="font-size:.82rem;margin-bottom:6px">4,000円下抜け→3,500円台</p>
+      <p><strong>確率: 30%</strong></p>
+      <p>勝率 → <span class="bad">10〜20%</span></p>
+    </div>
+  </div>
+
+  <div class="chart-box" style="max-height:280px;margin-top:24px">
+    <canvas id="chartScenario"></canvas>
+  </div>
+
+  <div class="tip">
+    <strong>確率加重した期待勝率：</strong><br>
+    0.3×65% + 0.4×45% + 0.3×15% ＝ <strong>約 42%</strong><br>
+    ペイオフレシオ2.0倍（利確+10% vs 損切り-5%）のため、
+    損益分岐勝率は33.3%。<strong>期待勝率42%はこれを上回っており、期待値はプラス</strong>です。
+  </div>
+</section>
+
+<!-- ━━ ⑩ 実行ルール ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#d1fae5;color:#065f46">✅</span> 実行ルール（売買プラン）</h2>
+  <p class="lead">すべてをまとめた、実際に使える売買ルールです。</p>
+
+  <div class="rule-block">
+    <h4>1. エントリー条件</h4>
+    <ul>
+      <li>日足終値が<strong>5日移動平均線を上抜け</strong>（前日は5MA以下）</li>
+      <li>当日が<strong>陽線</strong>（終値 &gt; 始値）</li>
+      <li>RSI(14) が <strong>60未満</strong></li>
+      <li>上記すべてを満たした<strong>翌営業日の寄付</strong>で成行買い</li>
+    </ul>
+    <p style="margin-top:8px;font-size:.82rem;color:var(--text-sub)">
+      ※ 4,000円帯で下ヒゲ＋翌日陽線が出た場合は、5MA上抜けを待たず少額で先行エントリーも可
+    </p>
+  </div>
+
+  <div class="rule-block">
+    <h4>2. 建玉</h4>
+    <p><span class="num">200株</span>（約80万円）</p>
+    <p style="font-size:.82rem;color:var(--text-sub)">信用買い。証拠金率を考慮し、追証ラインに余裕を持たせること。</p>
+  </div>
+
+  <div class="rule-block">
+    <h4>3. 損切り（逆指値）</h4>
+    <p>エントリー価格 × <span class="num">0.95</span>（−5%）</p>
+    <p>例：4,000円エントリー → 逆指値 <span class="num">3,800円</span> → 最大損失 <span class="num">−40,000円</span></p>
+  </div>
+
+  <div class="rule-block">
+    <h4>4. 利確（指値）</h4>
+    <p>エントリー価格 × <span class="num">1.10</span>（+10%）</p>
+    <p>例：4,000円エントリー → 指値 <span class="num">4,400円</span> → 利益 <span class="num">+80,000円</span></p>
+  </div>
+
+  <div class="rule-block">
+    <h4>5. 時間撤退</h4>
+    <ul>
+      <li>最大 <span class="num">40営業日</span>（約2か月）保有</li>
+      <li>含み益5%以上 → トレーリングストップに切替（高値から−3%で撤退）</li>
+      <li>含み損 → 40営業日到達で成行決済</li>
+    </ul>
+  </div>
+
+  <div class="rule-block">
+    <h4>6. イベント前後の扱い</h4>
+    <ul>
+      <li><strong>FOMC / 日銀会合の前日：</strong>含み益3%以上なら半分（100株）利確。残りは逆指値をエントリー価格に引上げ（損失ゼロ化）</li>
+      <li><strong>NEC決算（4月下旬）：</strong>決算跨ぎは原則回避。前営業日に含み益なら全決済。含み損でSL付近なら決算前撤退。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ━━ ⑪ リスクリターンまとめ ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#fef3c7;color:#92400e">⚖</span> リスク / リターン 早見表</h2>
+
+  <div class="grid2" style="gap:16px;margin-top:12px">
+    <div style="background:#f0fdf4;border-radius:12px;padding:20px;text-align:center">
+      <div style="font-size:.8rem;color:#065f46;margin-bottom:4px">最大利益（+10%）</div>
+      <div style="font-size:1.8rem;font-weight:800;color:#10b981">+80,000円</div>
+    </div>
+    <div style="background:#fef2f2;border-radius:12px;padding:20px;text-align:center">
+      <div style="font-size:.8rem;color:#991b1b;margin-bottom:4px">最大損失（−5% SL）</div>
+      <div style="font-size:1.8rem;font-weight:800;color:#ef4444">−40,000円</div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:20px">
+    <table>
+      <thead><tr><th>項目</th><th>値</th></tr></thead>
+      <tbody>
+        <tr><td>建玉</td><td>200株 × 4,000円 ＝ 800,000円</td></tr>
+        <tr><td>ペイオフレシオ</td><td><strong>2.0倍</strong>（利益/損失 ＝ 80,000/40,000）</td></tr>
+        <tr><td>損益分岐勝率</td><td><strong>33.3%</strong>（これ以上勝てば長期的にプラス）</td></tr>
+        <tr><td>確率加重 期待勝率</td><td><strong>約42%</strong>（損益分岐を上回る）</td></tr>
+        <tr><td>期待リターン（1トレード）</td><td class="good">+2.5 〜 +5.9%（+20,000 〜 47,000円）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>ペイオフレシオとは？</strong><br>
+    「勝ったときの平均利益 ÷ 負けたときの平均損失」。
+    2.0倍なら「1回の勝ちで2回分の負けを取り返せる」ということ。
+    このため、勝率が50%を下回っても利益が出るルールになっています。
+  </div>
+</section>
+
+<!-- ━━ ⑫ 事実と推測 ━━ -->
+<section class="card">
+  <h2><span class="icon" style="background:#f1f5f9;color:#475569">⚠</span> 事実と推測の区分</h2>
+
+  <div class="grid2" style="gap:16px;margin-top:8px">
+    <div class="rule-block" style="border-left:4px solid var(--green)">
+      <h4 style="color:var(--green)">事実（データに基づく）</h4>
+      <ul>
+        <li>直近終値4,004円、RSI 23.9、ATR 287円</li>
+        <li>5日間で−17.2%の急落</li>
+        <li>4,000帯のタッチ15回中、反発6回（40%）</li>
+        <li>バックテスト全期間: 戦略B(SL−5%)勝率72.7%（n=11）</li>
+        <li>−3%SLはATR対比で狭すぎ、SLヒット率55〜69%</li>
+        <li>Q3決算はEPS予想を上回ったが、構造改革費用を嫌気して売られた</li>
+      </ul>
+    </div>
+    <div class="rule-block" style="border-left:4px solid var(--amber)">
+      <h4 style="color:var(--amber)">推測（判断・解釈を含む）</h4>
+      <ul>
+        <li>4,000円は「一定の支持」だが強固とは言い切れない</li>
+        <li>RSI 23.9の売られ過ぎから自律反発は近い可能性が高い</li>
+        <li>SaaS/AI関連の構造的売り一巡までは下値リスクが残る</li>
+        <li>確率加重した期待勝率42%はあくまで推測</li>
+        <li>反転確認後のエントリーが即時エントリーより合理的</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ━━ Footer ━━ -->
+<footer class="footer">
+  <p>本レポートは過去のデータに基づく定量分析であり、将来の投資成果を保証するものではありません。</p>
+  <p>投資判断は必ずご自身の責任で行ってください。</p>
+  <p style="margin-top:8px">Generated on 2026-02-18 ／ Data: yfinance ／ Analysis: GT-SOAR</p>
+</footer>
+
+</div><!-- /container -->
+
+<!-- ━━━━━━━━ Charts ━━━━━━━━ -->
+<script>
+const COLORS = {
+  blue:    '#1a56db',
+  sky:     '#0ea5e9',
+  green:   '#10b981',
+  red:     '#ef4444',
+  amber:   '#f59e0b',
+  purple:  '#8b5cf6',
+  blueBg:  'rgba(26,86,219,.12)',
+  greenBg: 'rgba(16,185,129,.12)',
+  redBg:   'rgba(239,68,68,.12)',
+};
+
+Chart.defaults.font.family = '"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif';
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyleWidth = 10;
+
+// ── Support zone chart ──
+new Chart(document.getElementById('chartSupport'), {
+  type: 'doughnut',
+  data: {
+    labels: ['反発成功 (40%)', '下抜け (13%)', '帯内滞留 (47%)'],
+    datasets: [{
+      data: [6, 2, 7],
+      backgroundColor: [COLORS.green, COLORS.red, COLORS.amber],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    cutout: '55%',
+    plugins: {
+      title: { display: true, text: '4,000円帯タッチ後の結果（15回）', font:{size:13,weight:'bold'} },
+      legend: { position:'bottom' }
+    }
+  }
+});
+
+// ── Backtest comparison chart ──
+new Chart(document.getElementById('chartBacktest'), {
+  type: 'bar',
+  data: {
+    labels: ['A (−3%)', 'B (−3%)', 'A (−5%)', 'B (−5%)', 'A (−6%)', 'B (−6%)'],
+    datasets: [
+      {
+        label: '勝率 (%)',
+        data: [36.4, 45.5, 54.5, 72.7, 54.5, 72.7],
+        backgroundColor: COLORS.blueBg,
+        borderColor: COLORS.blue,
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: '期待値 (%)',
+        data: [2.13, 2.91, 4.08, 5.91, 3.72, 5.64],
+        backgroundColor: COLORS.greenBg,
+        borderColor: COLORS.green,
+        borderWidth: 2,
+        borderRadius: 6,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: { mode:'index', intersect:false },
+    plugins: {
+      title: { display:true, text:'戦略×損切り幅 — 勝率 & 期待値（全期間）', font:{size:13,weight:'bold'} },
+      legend: { position:'top' }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display:true, text:'%' },
+        grid: { color:'rgba(0,0,0,.05)' }
+      },
+      x: { grid: { display:false } }
+    }
+  }
+});
+
+// ── 4000 zone chart ──
+new Chart(document.getElementById('chart4000'), {
+  type: 'bar',
+  data: {
+    labels: ['SL −3%', 'SL −5%', 'SL −6%'],
+    datasets: [
+      {
+        label: '勝率 (%)',
+        data: [28.6, 47.6, 61.9],
+        backgroundColor: [COLORS.redBg, COLORS.blueBg, COLORS.blueBg],
+        borderColor: [COLORS.red, COLORS.blue, COLORS.blue],
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'SLヒット率 (%)',
+        data: [61.9, 42.9, 28.6],
+        backgroundColor: ['rgba(239,68,68,.08)','rgba(239,68,68,.08)','rgba(239,68,68,.08)'],
+        borderColor: COLORS.red,
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderDash: [4,4],
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      title: { display:true, text:'4,000円帯エントリー — 損切り幅別の成績', font:{size:13,weight:'bold'} },
+    },
+    scales: {
+      y: { beginAtZero:true, title:{display:true,text:'%'}, grid:{color:'rgba(0,0,0,.05)'} },
+      x: { grid:{display:false} }
+    }
+  }
+});
+
+// ── Monte Carlo chart ──
+new Chart(document.getElementById('chartMC'), {
+  type: 'bar',
+  data: {
+    labels: ['SL −3%', 'SL −5%', 'SL −6%'],
+    datasets: [
+      {
+        label: '+10%到達率',
+        data: [13.3, 16.2, 17.4],
+        backgroundColor: COLORS.greenBg,
+        borderColor: COLORS.green,
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'SLヒット率',
+        data: [86.7, 83.7, 82.4],
+        backgroundColor: COLORS.redBg,
+        borderColor: COLORS.red,
+        borderWidth: 2,
+        borderRadius: 6,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      title: { display:true, text:'モンテカルロ（直近60日トレンド前提, 10万回）', font:{size:13,weight:'bold'} },
+      subtitle: { display:true, text:'※ 直近の急落トレンドが続く前提の"最悪ケース"想定', font:{size:11}, color:COLORS.red }
+    },
+    scales: {
+      y: { beginAtZero:true, max:100, title:{display:true,text:'%'}, grid:{color:'rgba(0,0,0,.05)'} },
+      x: { grid:{display:false} }
+    }
+  }
+});
+
+// ── Scenario chart ──
+new Chart(document.getElementById('chartScenario'), {
+  type: 'bar',
+  data: {
+    labels: ['Bull (楽観)', 'Base (中立)', 'Bear (悲観)', '確率加重平均'],
+    datasets: [
+      {
+        label: '想定勝率 (%)',
+        data: [65, 45, 15, 42],
+        backgroundColor: [
+          'rgba(16,185,129,.18)',
+          'rgba(245,158,11,.18)',
+          'rgba(239,68,68,.18)',
+          'rgba(26,86,219,.18)',
+        ],
+        borderColor: [COLORS.green, COLORS.amber, COLORS.red, COLORS.blue],
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'シナリオ確率 (%)',
+        data: [30, 40, 30, 100],
+        backgroundColor: 'rgba(0,0,0,0)',
+        borderColor: 'rgba(100,116,139,.5)',
+        borderWidth: 1.5,
+        borderDash: [5,3],
+        borderRadius: 6,
+        type: 'line',
+        yAxisID: 'y1',
+        pointBackgroundColor: 'rgba(100,116,139,.7)',
+        tension: 0,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      title: { display:true, text:'シナリオ別 想定勝率', font:{size:13,weight:'bold'} },
+      annotation: {
+        annotations: {
+          breakeven: {
+            type: 'line', yMin:33.3, yMax:33.3,
+            borderColor: COLORS.red, borderWidth:1, borderDash:[6,4],
+            label: { display:true, content:'損益分岐 33.3%', position:'end', font:{size:10} }
+          }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero:true, max:100, title:{display:true,text:'勝率 (%)'}, grid:{color:'rgba(0,0,0,.05)'} },
+      y1: { display:false, beginAtZero:true, max:100 },
+      x: { grid:{display:false} }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

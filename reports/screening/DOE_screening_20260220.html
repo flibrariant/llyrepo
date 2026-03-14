@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DOEスクリーニング 分析レポート 2026/02/20</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0f1a;color:#dde4f0;font-family:'Segoe UI',Meiryo,sans-serif;font-size:14px}
+a{color:#7986cb;text-decoration:none}
+
+/* ヘッダー */
+.header{background:linear-gradient(135deg,#0d1b4b,#1a2966);padding:20px 28px;border-bottom:2px solid #2a3a7a}
+.header h1{font-size:1.4rem;font-weight:700;color:#fff}
+.header p{color:#8fa8d8;font-size:.83rem;margin-top:5px;line-height:1.6}
+.criteria-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tag{background:#1e3170;border:1px solid #3d5ab0;border-radius:20px;padding:3px 12px;font-size:.75rem;color:#b0c4ff}
+
+/* 統計カード */
+.stats-row{display:flex;gap:12px;padding:16px 24px;overflow-x:auto}
+.scard{background:#141830;border:1px solid #222a44;border-radius:8px;padding:12px 16px;min-width:150px}
+.scard-label{font-size:.68rem;color:#5a7ab0;text-transform:uppercase;letter-spacing:.5px}
+.scard-val{font-size:1.4rem;font-weight:700;margin-top:3px;color:#e8efff}
+.scard-sub{font-size:.72rem;color:#6a8ac0;margin-top:2px}
+
+/* セクションタイトル */
+.sec-title{font-size:.78rem;color:#5a7ab0;text-transform:uppercase;letter-spacing:1px;padding:14px 24px 5px;font-weight:700}
+
+/* チャートラップ */
+.chart-wrap{background:#141830;border-radius:8px;margin:0 20px 16px;border:1px solid #222a44;overflow:hidden}
+
+/* メインテーブル */
+.table-wrap{margin:0 20px 16px;border-radius:8px;overflow:hidden;border:1px solid #222a44}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead tr{background:#0d1b4b}
+th{padding:9px 10px;text-align:left;color:#8fa8d8;font-weight:600;white-space:nowrap}
+tbody tr{border-bottom:1px solid #1a2040}
+tbody tr:hover{background:#19204a}
+tbody tr.top-row{background:#13203a}
+tbody tr.top-row:hover{background:#1b2b4a}
+td{padding:7px 10px;white-space:nowrap}
+.tc{text-align:center}.tr{text-align:right}
+.mono{font-family:monospace;font-size:.88rem;color:#8fa8d8}
+
+/* メトリクスセル */
+.metric{font-weight:600;border-radius:3px;padding:2px 6px}
+.good{color:#26c6a0;background:rgba(38,198,160,0.12)}
+.ok  {color:#ffd54f;background:rgba(255,213,79,0.10)}
+.bad {color:#ef5350;background:rgba(239,83,80,0.12)}
+.na  {color:#444;font-style:italic}
+
+/* スコアセル */
+.score-cell{font-weight:700;color:#90caf9}
+.rank-badge{background:#1e3a78;color:#7ab0ff;border-radius:4px;padding:1px 6px;font-size:.72rem;margin-left:6px;vertical-align:middle}
+
+/* Top10カード */
+.picks-grid{display:flex;flex-direction:column;gap:16px;padding:0 20px 20px}
+.pick-card{background:#141830;border:1px solid #222a44;border-radius:10px;overflow:hidden}
+.pick-header{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:#0d1535;border-bottom:1px solid #222a44}
+.pick-rank{font-size:1.8rem;font-weight:900;color:#3d5ab0;min-width:40px;line-height:1}
+.pick-info{flex:1}
+.pick-code{font-family:monospace;font-size:.9rem;color:#5a8ad0}
+.pick-name{font-size:1.05rem;font-weight:700;color:#e8efff;margin:2px 0}
+.pick-sector{font-size:.75rem;color:#5a7ab0}
+.pick-meta{text-align:right}
+.pick-price{font-size:1.1rem;font-weight:700;color:#e8efff}
+.pick-cap{font-size:.75rem;color:#5a7ab0;margin-top:2px}
+.pick-conv{border-radius:4px;padding:3px 9px;font-size:.75rem;font-weight:600;margin-top:5px;display:inline-block}
+.conv-high{background:rgba(38,198,160,0.2);color:#26c6a0;border:1px solid #26c6a0}
+.conv-midhigh{background:rgba(100,180,255,0.15);color:#64b4ff;border:1px solid #4090e0}
+.conv-mid{background:rgba(255,213,79,0.12);color:#ffd54f;border:1px solid #e0a820}
+
+/* メトリクスバー */
+.pick-metrics{display:flex;gap:12px;padding:12px 18px;border-bottom:1px solid #1a2040}
+.pm-item{flex:1}
+.pm-label{font-size:.68rem;color:#5a7ab0;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.pm-bar-wrap{background:#1a2040;border-radius:3px;height:6px;margin-bottom:4px;overflow:hidden}
+.pm-bar{height:100%;border-radius:3px}
+.doe-bar{background:linear-gradient(90deg,#26c6a0,#00e676)}
+.psr-bar{background:linear-gradient(90deg,#5ab4ff,#80d8ff)}
+.pbr-bar{background:linear-gradient(90deg,#ffd54f,#ffe082)}
+.per-bar{background:linear-gradient(90deg,#ff8a80,#ff5252)}
+.pm-val{font-size:.82rem;font-weight:600}
+
+/* カード本文 */
+.pick-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pick-section{}
+.pick-sec-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;color:#5a7ab0}
+.catalyst-lbl{color:#64b4ff}
+.risk-lbl{color:#ef8f8f}
+.pick-sec-text{font-size:.8rem;line-height:1.65;color:#9ab0cc}
+.pick-score{text-align:right;padding:8px 18px;background:#0a1228;font-size:.78rem;color:#5a7ab0}
+.pick-score span{font-size:1.05rem;font-weight:700;color:#90caf9}
+
+footer{text-align:center;padding:16px;color:#2a3a5a;font-size:.73rem;border-top:1px solid #181f38}
+@media(max-width:900px){
+  .pick-body{grid-template-columns:1fr}
+  .pick-metrics{flex-wrap:wrap}
+  .pm-item{min-width:45%}
+  .stats-row{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <h1>DOE 2%以上見込み × 時価総額500億未満 ｜ スクリーニング分析レポート</h1>
+  <p>配当政策が積極的で割安な小型株から、1〜3ヶ月での10%上昇が期待できる銘柄を厳選</p>
+  <div class="criteria-tags">
+    <span class="tag">DOE（株主資本配当率）2%以上見込み</span>
+    <span class="tag">時価総額 500億円未満</span>
+    <span class="tag">スクリーニング対象 33社</span>
+    <span class="tag">2026年2月20日</span>
+    <span class="tag">データ：yfinance</span>
+  </div>
+</div>
+
+<!-- 統計カード -->
+<div class="stats-row">
+  <div class="scard">
+    <div class="scard-label">対象銘柄数</div>
+    <div class="scard-val">33社</div>
+    <div class="scard-sub">時価総額42〜495億円</div>
+  </div>
+  <div class="scard">
+    <div class="scard-label">平均DOE</div>
+    <div class="scard-val">3.36%</div>
+    <div class="scard-sub">最高：4.63%</div>
+  </div>
+  <div class="scard">
+    <div class="scard-label">平均PSR</div>
+    <div class="scard-val">0.71</div>
+    <div class="scard-sub">最低：0.09</div>
+  </div>
+  <div class="scard">
+    <div class="scard-label">PBR<1.0の銘柄</div>
+    <div class="scard-val">21社</div>
+    <div class="scard-sub">解散価値以下での取引</div>
+  </div>
+  <div class="scard">
+    <div class="scard-label">平均PER</div>
+    <div class="scard-val">14.6倍</div>
+    <div class="scard-sub">市場平均より低水準</div>
+  </div>
+  <div class="scard">
+    <div class="scard-label">選定銘柄数</div>
+    <div class="scard-val">10社</div>
+    <div class="scard-sub">1〜3ヶ月 10%上昇候補</div>
+  </div>
+</div>
+
+<!-- バブルチャート -->
+<p class="sec-title">▌ PSR vs DOE バブルチャート（全対象銘柄）</p>
+<div class="chart-wrap"><div id="bubbleChart"></div></div>
+
+<!-- 選定銘柄レーダー -->
+<p class="sec-title">▌ 選定TOP10 スコア比較</p>
+<div class="chart-wrap"><div id="barChart"></div></div>
+
+<!-- 全銘柄テーブル -->
+<p class="sec-title">▌ スクリーニング結果 全32社（スコア順）</p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="tc">順位</th>
+        <th class="tc">コード</th>
+        <th>企業名</th>
+        <th class="tr">株価</th>
+        <th class="tr">時価総額</th>
+        <th class="tr">DOE</th>
+        <th class="tr">PSR</th>
+        <th class="tr">PBR</th>
+        <th class="tr">PER</th>
+        <th class="tr">配当利回</th>
+        <th class="tr">スコア</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr class="top-row">
+      <td class="tc">1</td>
+      <td class="tc mono">9908</td>
+      <td>日本電計<span class="rank-badge">TOP1</span></td>
+      <td class="tr">2,572</td>
+      <td class="tr">290.7億</td>
+      <td class="tr metric good">3.31%</td>
+      <td class="tr metric good">0.22</td>
+      <td class="tr metric ok">0.95</td>
+      <td class="tr metric good">9.9倍</td>
+      <td class="tr">345.00%</td>
+      <td class="tr score-cell">86</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">2</td>
+      <td class="tc mono">8101</td>
+      <td>G.S.I.クレオス<span class="rank-badge">TOP2</span></td>
+      <td class="tr">2,708</td>
+      <td class="tr">332.6億</td>
+      <td class="tr metric good">3.97%</td>
+      <td class="tr metric good">0.19</td>
+      <td class="tr metric ok">1.05</td>
+      <td class="tr metric ok">13.5倍</td>
+      <td class="tr">373.00%</td>
+      <td class="tr score-cell">82</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">3</td>
+      <td class="tc mono">9441</td>
+      <td>ベルパーク<span class="rank-badge">TOP3</span></td>
+      <td class="tr">2,603</td>
+      <td class="tr">318.6億</td>
+      <td class="tr metric good">4.62%</td>
+      <td class="tr metric good">0.25</td>
+      <td class="tr metric ok">1.18</td>
+      <td class="tr metric ok">13.4倍</td>
+      <td class="tr">395.00%</td>
+      <td class="tr score-cell">79</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">4</td>
+      <td class="tc mono">3333</td>
+      <td>あさひ<span class="rank-badge">TOP4</span></td>
+      <td class="tr">1,284</td>
+      <td class="tr">334.4億</td>
+      <td class="tr metric good">3.19%</td>
+      <td class="tr metric ok">0.41</td>
+      <td class="tr metric good">0.82</td>
+      <td class="tr metric good">11.4倍</td>
+      <td class="tr">385.00%</td>
+      <td class="tr score-cell">79</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">5</td>
+      <td class="tc mono">256A</td>
+      <td>鳥島ホールディングス<span class="rank-badge">TOP5</span></td>
+      <td class="tr">2,508</td>
+      <td class="tr">480.4億</td>
+      <td class="tr metric good">3.63%</td>
+      <td class="tr metric ok">0.35</td>
+      <td class="tr metric ok">0.91</td>
+      <td class="tr metric ok">12.9倍</td>
+      <td class="tr">393.00%</td>
+      <td class="tr score-cell">79</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">6</td>
+      <td class="tc mono">2060</td>
+      <td>フィード・ワン<span class="rank-badge">TOP6</span></td>
+      <td class="tr">1,259</td>
+      <td class="tr">481.8億</td>
+      <td class="tr metric ok">2.39%</td>
+      <td class="tr metric good">0.17</td>
+      <td class="tr metric good">0.81</td>
+      <td class="tr metric good">9.3倍</td>
+      <td class="tr">292.00%</td>
+      <td class="tr score-cell">79</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">7</td>
+      <td class="tc mono">7971</td>
+      <td>東リ<span class="rank-badge">TOP7</span></td>
+      <td class="tr">768</td>
+      <td class="tr">447.3億</td>
+      <td class="tr metric good">3.72%</td>
+      <td class="tr metric ok">0.40</td>
+      <td class="tr metric good">0.89</td>
+      <td class="tr metric ok">12.9倍</td>
+      <td class="tr">412.00%</td>
+      <td class="tr score-cell">79</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">8</td>
+      <td class="tc mono">5013</td>
+      <td>ユシロ化学工業<span class="rank-badge">TOP8</span></td>
+      <td class="tr">3,100</td>
+      <td class="tr">403.8億</td>
+      <td class="tr metric good">3.85%</td>
+      <td class="tr metric bad">0.77</td>
+      <td class="tr metric good">0.88</td>
+      <td class="tr metric good">8.7倍</td>
+      <td class="tr">437.00%</td>
+      <td class="tr score-cell">76</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">9</td>
+      <td class="tc mono">7438</td>
+      <td>コンドーテック<span class="rank-badge">TOP9</span></td>
+      <td class="tr">1,510</td>
+      <td class="tr">386.8億</td>
+      <td class="tr metric good">3.53%</td>
+      <td class="tr metric ok">0.47</td>
+      <td class="tr metric ok">1.03</td>
+      <td class="tr metric ok">12.0倍</td>
+      <td class="tr">342.00%</td>
+      <td class="tr score-cell">75</td>
+    </tr>
+    <tr class="top-row">
+      <td class="tc">10</td>
+      <td class="tc mono">2475</td>
+      <td>WDBホールディングス<span class="rank-badge">TOP10</span></td>
+      <td class="tr">1,574</td>
+      <td class="tr">309.1億</td>
+      <td class="tr metric good">3.72%</td>
+      <td class="tr metric ok">0.61</td>
+      <td class="tr metric ok">0.94</td>
+      <td class="tr metric good">10.1倍</td>
+      <td class="tr">394.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">11</td>
+      <td class="tc mono">7482</td>
+      <td>シモジマ</td>
+      <td class="tr">1,446</td>
+      <td class="tr">338.2億</td>
+      <td class="tr metric good">3.48%</td>
+      <td class="tr metric ok">0.53</td>
+      <td class="tr metric ok">0.93</td>
+      <td class="tr metric ok">14.6倍</td>
+      <td class="tr">372.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">12</td>
+      <td class="tc mono">2792</td>
+      <td>ハニーズホールディングス</td>
+      <td class="tr">1,509</td>
+      <td class="tr">420.7億</td>
+      <td class="tr metric good">3.18%</td>
+      <td class="tr metric bad">0.74</td>
+      <td class="tr metric good">0.87</td>
+      <td class="tr metric ok">12.3倍</td>
+      <td class="tr">361.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">13</td>
+      <td class="tc mono">9739</td>
+      <td>ラクト・ジャパン</td>
+      <td class="tr">2,385</td>
+      <td class="tr">355.4億</td>
+      <td class="tr metric good">3.46%</td>
+      <td class="tr metric ok">0.69</td>
+      <td class="tr metric ok">0.97</td>
+      <td class="tr metric good">10.4倍</td>
+      <td class="tr">351.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">14</td>
+      <td class="tc mono">9368</td>
+      <td>キムラユニティー</td>
+      <td class="tr">942</td>
+      <td class="tr">387.4億</td>
+      <td class="tr metric good">3.34%</td>
+      <td class="tr metric ok">0.62</td>
+      <td class="tr metric ok">0.92</td>
+      <td class="tr metric good">11.5倍</td>
+      <td class="tr">363.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">15</td>
+      <td class="tc mono">4463</td>
+      <td>日華化学</td>
+      <td class="tr">1,808</td>
+      <td class="tr">286.7億</td>
+      <td class="tr metric good">3.16%</td>
+      <td class="tr metric ok">0.51</td>
+      <td class="tr metric good">0.82</td>
+      <td class="tr metric good">11.3倍</td>
+      <td class="tr">382.00%</td>
+      <td class="tr score-cell">73</td>
+    </tr>
+    <tr class="">
+      <td class="tc">16</td>
+      <td class="tc mono">9906</td>
+      <td>藤井産業</td>
+      <td class="tr">4,275</td>
+      <td class="tr">361.5億</td>
+      <td class="tr metric ok">2.75%</td>
+      <td class="tr metric ok">0.35</td>
+      <td class="tr metric ok">0.91</td>
+      <td class="tr metric good">7.4倍</td>
+      <td class="tr">304.00%</td>
+      <td class="tr score-cell">72</td>
+    </tr>
+    <tr class="">
+      <td class="tc">17</td>
+      <td class="tc mono">1828</td>
+      <td>田辺工業</td>
+      <td class="tr">2,830</td>
+      <td class="tr">297.1億</td>
+      <td class="tr metric good">3.67%</td>
+      <td class="tr metric ok">0.59</td>
+      <td class="tr metric ok">1.13</td>
+      <td class="tr metric good">10.6倍</td>
+      <td class="tr">322.00%</td>
+      <td class="tr score-cell">69</td>
+    </tr>
+    <tr class="">
+      <td class="tc">18</td>
+      <td class="tc mono">7840</td>
+      <td>フランスベッドHLDG</td>
+      <td class="tr">1,335</td>
+      <td class="tr">445.5億</td>
+      <td class="tr metric good">4.08%</td>
+      <td class="tr metric bad">0.73</td>
+      <td class="tr metric ok">1.13</td>
+      <td class="tr metric ok">19.1倍</td>
+      <td class="tr">357.00%</td>
+      <td class="tr score-cell">65</td>
+    </tr>
+    <tr class="">
+      <td class="tc">19</td>
+      <td class="tc mono">8011</td>
+      <td>三陽商会</td>
+      <td class="tr">4,360</td>
+      <td class="tr">465.5億</td>
+      <td class="tr metric good">3.73%</td>
+      <td class="tr metric bad">0.78</td>
+      <td class="tr metric ok">1.17</td>
+      <td class="tr metric ok">15.3倍</td>
+      <td class="tr">314.00%</td>
+      <td class="tr score-cell">65</td>
+    </tr>
+    <tr class="">
+      <td class="tc">20</td>
+      <td class="tc mono">7749</td>
+      <td>メディキット</td>
+      <td class="tr">2,983</td>
+      <td class="tr">431.9億</td>
+      <td class="tr metric good">3.19%</td>
+      <td class="tr metric bad">1.82</td>
+      <td class="tr metric ok">0.95</td>
+      <td class="tr metric ok">14.2倍</td>
+      <td class="tr">333.00%</td>
+      <td class="tr score-cell">64</td>
+    </tr>
+    <tr class="">
+      <td class="tc">21</td>
+      <td class="tc mono">6272</td>
+      <td>レオン自動機</td>
+      <td class="tr">1,585</td>
+      <td class="tr">426.9億</td>
+      <td class="tr metric good">3.53%</td>
+      <td class="tr metric bad">1.04</td>
+      <td class="tr metric ok">1.04</td>
+      <td class="tr metric good">11.5倍</td>
+      <td class="tr">337.00%</td>
+      <td class="tr score-cell">64</td>
+    </tr>
+    <tr class="">
+      <td class="tc">22</td>
+      <td class="tc mono">9835</td>
+      <td>ジュンテンドー</td>
+      <td class="tr">518</td>
+      <td class="tr">42.0億</td>
+      <td class="tr metric bad">0.73%</td>
+      <td class="tr metric good">0.09</td>
+      <td class="tr metric good">0.38</td>
+      <td class="tr metric bad">25.2倍</td>
+      <td class="tr">193.00%</td>
+      <td class="tr score-cell">64</td>
+    </tr>
+    <tr class="">
+      <td class="tc">23</td>
+      <td class="tc mono">6742</td>
+      <td>京三製作所</td>
+      <td class="tr">771</td>
+      <td class="tr">482.4億</td>
+      <td class="tr metric ok">2.79%</td>
+      <td class="tr metric ok">0.55</td>
+      <td class="tr metric ok">0.93</td>
+      <td class="tr metric good">10.1倍</td>
+      <td class="tr">296.00%</td>
+      <td class="tr score-cell">63</td>
+    </tr>
+    <tr class="">
+      <td class="tc">24</td>
+      <td class="tc mono">4951</td>
+      <td>エステー</td>
+      <td class="tr">1,540</td>
+      <td class="tr">321.4億</td>
+      <td class="tr metric ok">2.73%</td>
+      <td class="tr metric ok">0.67</td>
+      <td class="tr metric ok">0.96</td>
+      <td class="tr metric ok">14.9倍</td>
+      <td class="tr">286.00%</td>
+      <td class="tr score-cell">63</td>
+    </tr>
+    <tr class="">
+      <td class="tc">25</td>
+      <td class="tc mono">6677</td>
+      <td>エスケーエレクトロニクス</td>
+      <td class="tr">3,495</td>
+      <td class="tr">362.9億</td>
+      <td class="tr metric good">4.55%</td>
+      <td class="tr metric bad">1.23</td>
+      <td class="tr metric ok">1.05</td>
+      <td class="tr metric ok">13.3倍</td>
+      <td class="tr">430.00%</td>
+      <td class="tr score-cell">60</td>
+    </tr>
+    <tr class="">
+      <td class="tc">26</td>
+      <td class="tc mono">6485</td>
+      <td>前澤給装工業</td>
+      <td class="tr">1,654</td>
+      <td class="tr">336.7億</td>
+      <td class="tr metric ok">2.89%</td>
+      <td class="tr metric bad">1.05</td>
+      <td class="tr metric good">0.84</td>
+      <td class="tr metric good">11.7倍</td>
+      <td class="tr">342.00%</td>
+      <td class="tr score-cell">58</td>
+    </tr>
+    <tr class="">
+      <td class="tc">27</td>
+      <td class="tc mono">5976</td>
+      <td>高周波熱錬</td>
+      <td class="tr">1,446</td>
+      <td class="tr">471.5億</td>
+      <td class="tr metric good">3.91%</td>
+      <td class="tr metric bad">0.83</td>
+      <td class="tr metric good">0.83</td>
+      <td class="tr metric bad">30.1倍</td>
+      <td class="tr">466.00%</td>
+      <td class="tr score-cell">57</td>
+    </tr>
+    <tr class="">
+      <td class="tc">28</td>
+      <td class="tc mono">9837</td>
+      <td>モリト</td>
+      <td class="tr">2,027</td>
+      <td class="tr">494.7億</td>
+      <td class="tr metric good">4.63%</td>
+      <td class="tr metric bad">0.87</td>
+      <td class="tr metric bad">1.30</td>
+      <td class="tr metric ok">15.0倍</td>
+      <td class="tr">357.00%</td>
+      <td class="tr score-cell">55</td>
+    </tr>
+    <tr class="">
+      <td class="tc">29</td>
+      <td class="tc mono">9742</td>
+      <td>アイネス</td>
+      <td class="tr">2,011</td>
+      <td class="tr">418.6億</td>
+      <td class="tr metric good">3.03%</td>
+      <td class="tr metric bad">1.11</td>
+      <td class="tr metric ok">1.11</td>
+      <td class="tr metric bad">32.3倍</td>
+      <td class="tr">272.00%</td>
+      <td class="tr score-cell">53</td>
+    </tr>
+    <tr class="">
+      <td class="tc">30</td>
+      <td class="tc mono">3932</td>
+      <td>アカツキ</td>
+      <td class="tr">3,035</td>
+      <td class="tr">437.7億</td>
+      <td class="tr metric good">3.68%</td>
+      <td class="tr metric bad">1.82</td>
+      <td class="tr metric ok">1.02</td>
+      <td class="tr metric bad">21.0倍</td>
+      <td class="tr">358.00%</td>
+      <td class="tr score-cell">52</td>
+    </tr>
+    <tr class="">
+      <td class="tc">31</td>
+      <td class="tc mono">7925</td>
+      <td>前澤化成工業</td>
+      <td class="tr">2,314</td>
+      <td class="tr">343.7億</td>
+      <td class="tr metric ok">2.42%</td>
+      <td class="tr metric bad">1.38</td>
+      <td class="tr metric good">0.80</td>
+      <td class="tr metric ok">17.9倍</td>
+      <td class="tr">301.00%</td>
+      <td class="tr score-cell">50</td>
+    </tr>
+    <tr class="">
+      <td class="tc">32</td>
+      <td class="tc mono">3580</td>
+      <td>小松マテーレ</td>
+      <td class="tr">883</td>
+      <td class="tr">341.0億</td>
+      <td class="tr metric ok">2.58%</td>
+      <td class="tr metric bad">0.84</td>
+      <td class="tr metric good">0.88</td>
+      <td class="tr metric bad">23.5倍</td>
+      <td class="tr">291.00%</td>
+      <td class="tr score-cell">50</td>
+    </tr></tbody>
+  </table>
+</div>
+
+<!-- Top10 ピック -->
+<p class="sec-title">▌ 厳選 TOP10 ピック ─ 1〜3ヶ月 10%上昇候補</p>
+<div class="picks-grid">
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#1</div>
+        <div class="pick-info">
+          <div class="pick-code">9908</div>
+          <div class="pick-name">日本電計</div>
+          <div class="pick-sector">電気機器卸売</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥2,572</div>
+          <div class="pick-cap">290.7億円</div>
+          <div class="conv-high pick-conv">確信度：高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:41%"></div></div>
+          <div class="pm-val good">3.31%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:89%"></div></div>
+          <div class="pm-val good">0.22</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:52%"></div></div>
+          <div class="pm-val ok">0.95</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:67%"></div></div>
+          <div class="pm-val good">9.9倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">電気機器の専門商社として安定した収益基盤を持つ。PSR 0.22は全銘柄中トップクラスの低さ（売上規模に対して時価総額が著しく小さい）。PER 9.9倍・PBR 0.95倍と割安感が強く、DOE 3.3%の安定配当が下値を支える。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">3月期本決算（5月発表予定）での増配余地あり。製造業の設備投資回復で電気機器需要が増加すれば業績上振れ。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">大口取引先の設備投資縮小、円高進行</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>86/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#2</div>
+        <div class="pick-info">
+          <div class="pick-code">8101</div>
+          <div class="pick-name">G.S.I.クレオス</div>
+          <div class="pick-sector">繊維・化学品商社</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥2,708</div>
+          <div class="pick-cap">332.6億円</div>
+          <div class="conv-high pick-conv">確信度：高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:49%"></div></div>
+          <div class="pm-val good">3.97%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:90%"></div></div>
+          <div class="pm-val good">0.19</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:47%"></div></div>
+          <div class="pm-val ok">1.05</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:55%"></div></div>
+          <div class="pm-val ok">13.5倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">繊維・化学品専門商社。PSR 0.19は驚異的な低さ。DOE 3.97%の積極配当方針は財務健全性の証明。PBR 1.05倍はやや割高に見えるが、PSRの低さが示す収益規模の大きさを考えると依然割安。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">中国向け化学品輸出の回復、原材料費の低下による利益改善、自社株買い発表の可能性。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">繊維業界の構造的縮小、中国経済の不透明感</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>82/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#3</div>
+        <div class="pick-info">
+          <div class="pick-code">9441</div>
+          <div class="pick-name">ベルパーク</div>
+          <div class="pick-sector">携帯代理店</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥2,603</div>
+          <div class="pick-cap">318.6億円</div>
+          <div class="conv-high pick-conv">確信度：高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:57%"></div></div>
+          <div class="pm-val good">4.62%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:87%"></div></div>
+          <div class="pm-val good">0.25</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:41%"></div></div>
+          <div class="pm-val ok">1.18</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:55%"></div></div>
+          <div class="pm-val ok">13.4倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">ソフトバンク系携帯代理店。DOE 4.62%は全銘柄最高水準で配当政策が非常に積極的。PSR 0.25も低く、安定した収益に対して株価が出遅れ。格安SIM普及や通信業界再編でM&A観測も。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">2月末の本決算発表見込み、増配・自社株買い発表、通信業界再編でプレミアム期待。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">ソフトバンクの代理店政策変更リスク、キャリアショップ縮小トレンド</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>79/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#4</div>
+        <div class="pick-info">
+          <div class="pick-code">3333</div>
+          <div class="pick-name">あさひ</div>
+          <div class="pick-sector">自転車小売</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥1,284</div>
+          <div class="pick-cap">334.4億円</div>
+          <div class="conv-midhigh pick-conv">確信度：中高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:39%"></div></div>
+          <div class="pm-val good">3.19%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:79%"></div></div>
+          <div class="pm-val ok">0.41</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:59%"></div></div>
+          <div class="pm-val good">0.82</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:62%"></div></div>
+          <div class="pm-val good">11.4倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">日本最大級の自転車小売チェーン。PBR 0.82倍と純資産以下での取引。健康志向・脱炭素のトレンドで自転車市場は中長期成長。DOE 3.2%の安定配当に加え、E-bike（電動自転車）市場の成長が追い風。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">春の自転車シーズン到来（3-5月）での既存店売上増、E-bike比率上昇による客単価向上、来期増配発表。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">消費者の節約志向による客数減、原材料費上昇</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>79/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#5</div>
+        <div class="pick-info">
+          <div class="pick-code">256A</div>
+          <div class="pick-name">鳥島ホールディングス</div>
+          <div class="pick-sector">ホールディングス</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥2,508</div>
+          <div class="pick-cap">480.4億円</div>
+          <div class="conv-mid pick-conv">確信度：中</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:45%"></div></div>
+          <div class="pm-val good">3.63%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:82%"></div></div>
+          <div class="pm-val ok">0.35</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:54%"></div></div>
+          <div class="pm-val ok">0.91</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:57%"></div></div>
+          <div class="pm-val ok">12.9倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">比較的新規の上場企業（アルファベット入りコード）。時価総額480億と本スクリーニング内では大きめだが、DOE 3.6%・PSR 0.35・PBR 0.91と指標面は良好。上場後の情報普及とともに機関投資家の注目が増す可能性。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">証券会社のカバレッジ開始、機関投資家の組み入れ、上場後初の決算発表での業績確認。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">上場後ロックアップ解除による売り圧力、知名度が低い</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>79/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#6</div>
+        <div class="pick-info">
+          <div class="pick-code">2060</div>
+          <div class="pick-name">フィード・ワン</div>
+          <div class="pick-sector">飼料・畜産</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥1,259</div>
+          <div class="pick-cap">481.8億円</div>
+          <div class="conv-midhigh pick-conv">確信度：中高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:29%"></div></div>
+          <div class="pm-val ok">2.39%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:91%"></div></div>
+          <div class="pm-val good">0.17</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:59%"></div></div>
+          <div class="pm-val good">0.81</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:69%"></div></div>
+          <div class="pm-val good">9.3倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">飼料・畜産事業を中核とする総合企業。PSR 0.17は全銘柄最低（売上の6倍程度の時価総額で超割安）。PER 9.3倍・PBR 0.81倍と三重の割安感。原料トウモロコシ・大豆相場の安定化が収益改善につながれば大幅な業績上振れ。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">穀物相場の安定化・低下による原価改善、養豚・養鶏業界の回復、3月本決算での通期業績上振れ。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">穀物価格の再騰貴、畜産業界のBSE・AI（鳥インフルエンザ）リスク</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>79/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#7</div>
+        <div class="pick-info">
+          <div class="pick-code">7971</div>
+          <div class="pick-name">東リ</div>
+          <div class="pick-sector">建材・インテリア</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥768</div>
+          <div class="pick-cap">447.3億円</div>
+          <div class="conv-mid pick-conv">確信度：中</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:46%"></div></div>
+          <div class="pm-val good">3.72%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:80%"></div></div>
+          <div class="pm-val ok">0.40</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:55%"></div></div>
+          <div class="pm-val good">0.89</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:57%"></div></div>
+          <div class="pm-val ok">12.9倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">床材・インテリア建材メーカー。DOE 3.7%の安定配当、PSR 0.40・PBR 0.89と割安。建設市場の回復や住宅リフォーム需要の拡大が業績押し上げ要因。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">能登半島地震の復興需要継続、住宅着工回復期待、来期の利益改善と増配。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">建設業界の人手不足による工事遅延、原材料価格の上昇</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>79/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#8</div>
+        <div class="pick-info">
+          <div class="pick-code">5013</div>
+          <div class="pick-name">ユシロ化学工業</div>
+          <div class="pick-sector">工業用潤滑油</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥3,100</div>
+          <div class="pick-cap">403.8億円</div>
+          <div class="conv-high pick-conv">確信度：高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:48%"></div></div>
+          <div class="pm-val good">3.85%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:61%"></div></div>
+          <div class="pm-val bad">0.77</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:56%"></div></div>
+          <div class="pm-val good">0.88</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:71%"></div></div>
+          <div class="pm-val good">8.7倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">工業用切削油・潤滑油の大手。PER 8.7倍は全銘柄最低水準の割安さ。DOE 3.85%の高配当と自動車・工作機械業界への安定供給で盤石な収益基盤。製造業の設備投資回復が業績上振れ要因。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">自動車メーカーの生産回復（EV・ハイブリッド含む）、金属加工業界の設備投資増加、配当方針の更なる積極化。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">EV化による切削工程の減少（長期リスク）、石油価格変動</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>76/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#9</div>
+        <div class="pick-info">
+          <div class="pick-code">7438</div>
+          <div class="pick-name">コンドーテック</div>
+          <div class="pick-sector">工業用資材商社</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥1,510</div>
+          <div class="pick-cap">386.8億円</div>
+          <div class="conv-midhigh pick-conv">確信度：中高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:44%"></div></div>
+          <div class="pm-val good">3.53%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:76%"></div></div>
+          <div class="pm-val ok">0.47</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:48%"></div></div>
+          <div class="pm-val ok">1.03</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:60%"></div></div>
+          <div class="pm-val ok">12.0倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">工業用ファスナー・建設資材の専門商社。DOE 3.5%・PSR 0.47・PBR 1.03と全指標でバランスが良い。建設業・製造業向けの幅広い製品ラインナップで景気回復局面での需要拡大が見込まれる。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">建設・製造業の受注回復、インフラ整備需要の継続、来期の増収増益。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">建設業の受注鈍化、海外競合品との価格競争</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>75/100</span></div>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <div class="pick-rank">#10</div>
+        <div class="pick-info">
+          <div class="pick-code">2475</div>
+          <div class="pick-name">WDBホールディングス</div>
+          <div class="pick-sector">技術者派遣</div>
+        </div>
+        <div class="pick-meta">
+          <div class="pick-price">¥1,574</div>
+          <div class="pick-cap">309.1億円</div>
+          <div class="conv-high pick-conv">確信度：高</div>
+        </div>
+      </div>
+      <div class="pick-metrics">
+        <div class="pm-item">
+          <div class="pm-label">DOE</div>
+          <div class="pm-bar-wrap"><div class="pm-bar doe-bar" style="width:46%"></div></div>
+          <div class="pm-val good">3.72%</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PSR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar psr-bar" style="width:69%"></div></div>
+          <div class="pm-val ok">0.61</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PBR</div>
+          <div class="pm-bar-wrap"><div class="pm-bar pbr-bar" style="width:53%"></div></div>
+          <div class="pm-val ok">0.94</div>
+        </div>
+        <div class="pm-item">
+          <div class="pm-label">PER</div>
+          <div class="pm-bar-wrap"><div class="pm-bar per-bar" style="width:66%"></div></div>
+          <div class="pm-val good">10.1倍</div>
+        </div>
+      </div>
+      <div class="pick-body">
+        <div class="pick-section">
+          <div class="pick-sec-label">投資テーシス</div>
+          <div class="pick-sec-text">理系・技術系人材派遣の専門企業。DOE 3.7%・PER 10.1倍・PBR 0.94倍と割安。エンジニア不足が深刻化する中で単価上昇・稼働率改善が続く。AI・半導体投資の拡大で技術者派遣需要は旺盛。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label catalyst-lbl">想定カタリスト（1〜3ヶ月）</div>
+          <div class="pick-sec-text">春の採用・配属シーズン（4月）での需要増加、技術者単価の上昇、半導体・EV関連投資の恩恵。</div>
+        </div>
+        <div class="pick-section">
+          <div class="pick-sec-label risk-lbl">主なリスク</div>
+          <div class="pick-sec-text">景気後退による企業の採用・投資抑制、人材確保コストの上昇</div>
+        </div>
+      </div>
+      <div class="pick-score">総合スコア <span>73/100</span></div>
+    </div></div>
+
+<footer>GT-SOAR Analysis System ｜ 2026-02-20 ｜ Data: yfinance ｜ 本レポートは情報提供目的であり、投資推奨ではありません</footer>
+
+<script>
+// ─── バブルチャート ─────────────────────────────────────────────────────────
+const allData = [{"code": "9908", "name": "日本電計", "doe": 3.31, "psr": 0.22, "pbr": 0.95, "per": 9.9, "cap": 290.7, "score": 86}, {"code": "8101", "name": "G.S.I.クレオス", "doe": 3.97, "psr": 0.19, "pbr": 1.05, "per": 13.5, "cap": 332.6, "score": 82}, {"code": "9441", "name": "ベルパーク", "doe": 4.62, "psr": 0.25, "pbr": 1.18, "per": 13.4, "cap": 318.6, "score": 79}, {"code": "3333", "name": "あさひ", "doe": 3.19, "psr": 0.41, "pbr": 0.82, "per": 11.4, "cap": 334.4, "score": 79}, {"code": "256A", "name": "鳥島ホールディングス", "doe": 3.63, "psr": 0.35, "pbr": 0.91, "per": 12.9, "cap": 480.4, "score": 79}, {"code": "2060", "name": "フィード・ワン", "doe": 2.39, "psr": 0.17, "pbr": 0.81, "per": 9.3, "cap": 481.8, "score": 79}, {"code": "7971", "name": "東リ", "doe": 3.72, "psr": 0.4, "pbr": 0.89, "per": 12.9, "cap": 447.3, "score": 79}, {"code": "5013", "name": "ユシロ化学工業", "doe": 3.85, "psr": 0.77, "pbr": 0.88, "per": 8.7, "cap": 403.8, "score": 76}, {"code": "7438", "name": "コンドーテック", "doe": 3.53, "psr": 0.47, "pbr": 1.03, "per": 12.0, "cap": 386.8, "score": 75}, {"code": "2475", "name": "WDBホールディングス", "doe": 3.72, "psr": 0.61, "pbr": 0.94, "per": 10.1, "cap": 309.1, "score": 73}, {"code": "7482", "name": "シモジマ", "doe": 3.48, "psr": 0.53, "pbr": 0.93, "per": 14.6, "cap": 338.2, "score": 73}, {"code": "2792", "name": "ハニーズホールディングス", "doe": 3.18, "psr": 0.74, "pbr": 0.87, "per": 12.3, "cap": 420.7, "score": 73}, {"code": "9739", "name": "ラクト・ジャパン", "doe": 3.46, "psr": 0.69, "pbr": 0.97, "per": 10.4, "cap": 355.4, "score": 73}, {"code": "9368", "name": "キムラユニティー", "doe": 3.34, "psr": 0.62, "pbr": 0.92, "per": 11.5, "cap": 387.4, "score": 73}, {"code": "4463", "name": "日華化学", "doe": 3.16, "psr": 0.51, "pbr": 0.82, "per": 11.3, "cap": 286.7, "score": 73}, {"code": "9906", "name": "藤井産業", "doe": 2.75, "psr": 0.35, "pbr": 0.91, "per": 7.4, "cap": 361.5, "score": 72}, {"code": "1828", "name": "田辺工業", "doe": 3.67, "psr": 0.59, "pbr": 1.13, "per": 10.6, "cap": 297.1, "score": 69}, {"code": "7840", "name": "フランスベッドHLDG", "doe": 4.08, "psr": 0.73, "pbr": 1.13, "per": 19.1, "cap": 445.5, "score": 65}, {"code": "8011", "name": "三陽商会", "doe": 3.73, "psr": 0.78, "pbr": 1.17, "per": 15.3, "cap": 465.5, "score": 65}, {"code": "7749", "name": "メディキット", "doe": 3.19, "psr": 1.82, "pbr": 0.95, "per": 14.2, "cap": 431.9, "score": 64}, {"code": "6272", "name": "レオン自動機", "doe": 3.53, "psr": 1.04, "pbr": 1.04, "per": 11.5, "cap": 426.9, "score": 64}, {"code": "9835", "name": "ジュンテンドー", "doe": 0.73, "psr": 0.09, "pbr": 0.38, "per": 25.2, "cap": 42.0, "score": 64}, {"code": "6742", "name": "京三製作所", "doe": 2.79, "psr": 0.55, "pbr": 0.93, "per": 10.1, "cap": 482.4, "score": 63}, {"code": "4951", "name": "エステー", "doe": 2.73, "psr": 0.67, "pbr": 0.96, "per": 14.9, "cap": 321.4, "score": 63}, {"code": "6677", "name": "エスケーエレクトロニクス", "doe": 4.55, "psr": 1.23, "pbr": 1.05, "per": 13.3, "cap": 362.9, "score": 60}, {"code": "6485", "name": "前澤給装工業", "doe": 2.89, "psr": 1.05, "pbr": 0.84, "per": 11.7, "cap": 336.7, "score": 58}, {"code": "5976", "name": "高周波熱錬", "doe": 3.91, "psr": 0.83, "pbr": 0.83, "per": 30.1, "cap": 471.5, "score": 57}, {"code": "9837", "name": "モリト", "doe": 4.63, "psr": 0.87, "pbr": 1.3, "per": 15.0, "cap": 494.7, "score": 55}, {"code": "9742", "name": "アイネス", "doe": 3.03, "psr": 1.11, "pbr": 1.11, "per": 32.3, "cap": 418.6, "score": 53}, {"code": "3932", "name": "アカツキ", "doe": 3.68, "psr": 1.82, "pbr": 1.02, "per": 21.0, "cap": 437.7, "score": 52}, {"code": "7925", "name": "前澤化成工業", "doe": 2.42, "psr": 1.38, "pbr": 0.8, "per": 17.9, "cap": 343.7, "score": 50}, {"code": "3580", "name": "小松マテーレ", "doe": 2.58, "psr": 0.84, "pbr": 0.88, "per": 23.5, "cap": 341.0, "score": 50}];
+const top10codes = ["9908", "8101", "9441", "3333", "256A", "2060", "7971", "5013", "7438", "2475"];
+
+const isTop = d => top10codes.includes(d.code);
+const bubble = {
+  type:'scatter', mode:'markers+text',
+  x: allData.map(d => d.psr),
+  y: allData.map(d => d.doe),
+  text: allData.map(d => isTop(d) ? d.name : ''),
+  textposition: allData.map(d => 'top center'),
+  textfont: {size:9, color:'#c0d0ff'},
+  marker: {
+    size: allData.map(d => Math.sqrt(d.cap||100) * 1.2),
+    color: allData.map(d => d.score),
+    colorscale: [
+      [0,'#1a2050'], [0.4,'#2a4090'], [0.7,'#3060d0'],
+      [0.85,'#26c6a0'], [1,'#00e676']
+    ],
+    showscale:true,
+    colorbar:{title:{text:'スコア'}, thickness:12, len:0.6, tickfont:{size:9}},
+    line: {color: allData.map(d => isTop(d)?'#ffd54f':'rgba(255,255,255,0.15)'),
+            width: allData.map(d => isTop(d)?2:0.5)},
+  },
+  hovertemplate: '<b>%{customdata[0]}</b> (%{customdata[1]})<br>PSR: %{x:.2f}<br>DOE: %{y:.2f}%<br>PBR: %{customdata[2]:.2f}<br>PER: %{customdata[3]:.1f}倍<br>スコア: %{customdata[4]}<extra></extra>',
+  customdata: allData.map(d => [d.name, d.code, d.pbr, d.per, d.score]),
+};
+
+// 左上ほど「割安×高DOE」の好ゾーン
+const goodZone = {
+  type:'rect', xref:'x', yref:'y',
+  x0:0, x1:0.5, y0:3, y1:6,
+  fillcolor:'rgba(38,198,160,0.05)', line:{color:'rgba(38,198,160,0.3)',width:1,dash:'dot'},
+  layer:'below',
+};
+const goodLabel = {
+  x:0.25, y:5.7, xref:'x', yref:'y',
+  text:'好ゾーン（低PSR×高DOE）', showarrow:false,
+  font:{size:9, color:'rgba(38,198,160,0.7)'},
+};
+
+Plotly.newPlot('bubbleChart', [bubble], {
+  paper_bgcolor:'#141830', plot_bgcolor:'#141830',
+  font:{color:'#8fa8d8', size:10},
+  margin:{t:16,b:50,l:60,r:80},
+  height:380,
+  xaxis:{title:{text:'PSR（低いほど割安）'}, gridcolor:'rgba(30,40,70,0.8)', range:[-0.1, 2.2], zerolinecolor:'#2a3060'},
+  yaxis:{title:{text:'DOE（高いほど積極配当）'}, gridcolor:'rgba(30,40,70,0.8)', range:[0,7], zerolinecolor:'#2a3060'},
+  shapes:[goodZone], annotations:[goodLabel],
+}, {responsive:true, displayModeBar:false});
+
+// ─── バーチャート ─────────────────────────────────────────────────────────────
+const top10names  = ["日本電計", "G.S.I.クレオス", "ベルパーク", "あさひ", "鳥島ホールディングス", "フィード・ワン", "東リ", "ユシロ化学工業", "コンドーテック", "WDBホールディングス"];
+const top10scores = [86, 82, 79, 79, 79, 79, 79, 76, 75, 73];
+const top10doe    = [3.31, 3.97, 4.62, 3.19, 3.63, 2.39, 3.72, 3.85, 3.53, 3.72];
+const top10psr    = [0.22, 0.19, 0.25, 0.41, 0.35, 0.17, 0.4, 0.77, 0.47, 0.61];
+const top10pbr    = [0.95, 1.05, 1.18, 0.82, 0.91, 0.81, 0.89, 0.88, 1.03, 0.94];
+const top10per    = [9.9, 13.5, 13.4, 11.4, 12.9, 9.3, 12.9, 8.7, 12.0, 10.1];
+
+Plotly.newPlot('barChart', [
+  {type:'bar', name:'DOE(%)', x:top10names, y:top10doe,
+    marker:{color:'rgba(38,198,160,0.8)'},
+    hovertemplate:'DOE: %{y:.2f}%<extra></extra>'},
+  {type:'bar', name:'総合スコア(/100)', x:top10names, y:top10scores.map(s=>s/10),
+    marker:{color:'rgba(100,180,255,0.7)'},
+    hovertemplate:'スコア: %{y:.0f}/10<extra></extra>'},
+], {
+  paper_bgcolor:'#141830', plot_bgcolor:'#141830',
+  font:{color:'#8fa8d8', size:10},
+  margin:{t:16,b:80,l:50,r:20},
+  height:300, barmode:'group',
+  legend:{bgcolor:'rgba(10,15,35,0.8)', bordercolor:'#2a3060', borderwidth:1,
+           orientation:'h', x:0, y:1.05},
+  xaxis:{gridcolor:'rgba(30,40,70,0.8)', tickangle:-30, tickfont:{size:9}},
+  yaxis:{gridcolor:'rgba(30,40,70,0.8)', title:''},
+}, {responsive:true, displayModeBar:false});
+</script>
+</body>
+</html>

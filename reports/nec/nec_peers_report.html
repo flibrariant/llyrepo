@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEC (6701) 同業比較レポート</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --primary: #1a56db;
+    --primary-light: #e8eefb;
+    --accent: #0ea5e9;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --amber: #f59e0b;
+    --amber-light: #fef3c7;
+    --purple: #8b5cf6;
+    --text: #1e293b;
+    --sub: #64748b;
+    --border: #e2e8f0;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.72;-webkit-font-smoothing:antialiased}
+
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#0f2942 0%,#1a56db 55%,#38bdf8 100%);color:#fff;padding:52px 24px 44px;text-align:center;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.10) 0%,transparent 55%)}
+  .hero h1{font-size:clamp(1.5rem,3.8vw,2.2rem);font-weight:800;letter-spacing:.02em;position:relative;z-index:1}
+  .hero .sub{margin-top:6px;font-size:.92rem;opacity:.82;position:relative;z-index:1}
+  .hero .badge{display:inline-block;margin-top:14px;padding:3px 14px;background:rgba(255,255,255,.16);border-radius:999px;font-size:.8rem;backdrop-filter:blur(4px);position:relative;z-index:1}
+
+  .container{max-width:1040px;margin:0 auto;padding:0 20px 80px}
+
+  /* Top verdict */
+  .top-verdict{margin:-30px auto 32px;position:relative;z-index:2;max-width:1040px;padding:0 20px}
+  .top-verdict-inner{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .tv-rank{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .tv-rank .num{font-size:2rem;font-weight:900;color:var(--primary)}
+  .tv-rank .lbl{font-size:.68rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
+  .tv-detail{flex:1;min-width:200px}
+  .tv-detail h3{font-size:1.1rem;font-weight:700;margin-bottom:2px}
+  .tv-detail p{font-size:.86rem;color:var(--sub)}
+
+  /* Card */
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 32px;margin-bottom:26px}
+  .card h2{font-size:1.12rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card h2 .ic{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0}
+  .card .lead{color:var(--sub);font-size:.86rem;margin-bottom:18px}
+
+  /* Tables */
+  .tw{overflow-x:auto;margin:14px -4px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  thead th{background:var(--primary-light);color:var(--primary);font-weight:600;padding:9px 12px;text-align:center;white-space:nowrap;border-bottom:2px solid var(--primary)}
+  thead th:first-child{text-align:left;border-radius:8px 0 0 0}
+  thead th:last-child{border-radius:0 8px 0 0}
+  td{padding:9px 12px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+  td:first-child{text-align:left;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.hl{background:#f0f7ff}
+  .g{color:var(--green);font-weight:600}
+  .r{color:var(--red);font-weight:600}
+  .n{color:var(--amber);font-weight:600}
+
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:600}
+  .pill-g{background:var(--green-light);color:#065f46}
+  .pill-r{background:var(--red-light);color:#991b1b}
+  .pill-a{background:var(--amber-light);color:#92400e}
+  .pill-b{background:var(--primary-light);color:var(--primary)}
+
+  .tip{background:#eff6ff;border-left:4px solid var(--primary);border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.86rem;line-height:1.65}
+  .tip b{color:var(--primary)}
+  .tip-a{background:#fffbeb;border-left-color:var(--amber)}.tip-a b{color:#92400e}
+  .tip-r{background:#fef2f2;border-left-color:var(--red)}.tip-r b{color:#991b1b}
+
+  .chart-box{position:relative;width:100%;max-height:380px;margin:14px 0}
+
+  /* Score bar */
+  .score-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .score-row:last-child{border-bottom:none}
+  .sr-name{width:90px;font-weight:600;font-size:.88rem;flex-shrink:0}
+  .sr-bar-bg{flex:1;height:22px;background:#f1f5f9;border-radius:6px;overflow:hidden;position:relative}
+  .sr-bar{height:100%;border-radius:6px;transition:width .6s ease}
+  .sr-score{width:44px;text-align:right;font-weight:700;font-size:.92rem;flex-shrink:0}
+  .sr-reasons{font-size:.76rem;color:var(--sub);margin-top:2px;padding-left:100px}
+
+  /* Radar legend fix */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr}}
+
+  .footer{text-align:center;padding:28px 20px;font-size:.76rem;color:var(--sub);border-top:1px solid var(--border);margin-top:36px}
+
+  /* Heatmap cell colors */
+  .heat-vg{background:#dcfce7;color:#166534}
+  .heat-g{background:#f0fdf4;color:#166534}
+  .heat-n{background:#fefce8;color:#854d0e}
+  .heat-b{background:#fef2f2;color:#991b1b}
+  .heat-vb{background:#fee2e2;color:#7f1d1d}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>NEC (6701) 同業比較レポート</h1>
+  <p class="sub">IT・総合電機セクター8銘柄との横比較で、短期トレード適性を評価</p>
+  <span class="badge">基準日 2026-02-18 ／ 直近1年 日足データ</span>
+</header>
+
+<!-- Top verdict -->
+<div class="top-verdict">
+  <div class="top-verdict-inner">
+    <div class="tv-rank"><span class="num">2位</span><span class="lbl">NEC総合順位</span></div>
+    <div class="tv-detail">
+      <h3>NECの位置づけ：「反発余地は大きいが、ボラの高さが難点」</h3>
+      <p>アナリスト目標株価との乖離+62%・予想PER 5.6倍は8社中トップクラスの割安感。
+        一方、20日ボラ75%は最も高く、損切りに引っかかりやすい。
+        総合スコアでは富士通に次ぐ2位。反転確認後のエントリーが鍵。</p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ━━ ① 比較銘柄の紹介 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#eff6ff;color:var(--primary)">📋</span> 比較銘柄一覧</h2>
+  <p class="lead">NECと事業領域が近い、あるいは投資家が比較対象にしやすい8銘柄を選定しました。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>銘柄</th><th>コード</th><th>セクター</th><th>株価</th><th>なぜ比較対象？</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>NEC</td><td>6701</td><td>IT総合・防衛</td><td>4,004円</td><td>本命 ─ 今回の分析対象</td></tr>
+        <tr><td>富士通</td><td>6702</td><td>IT総合</td><td>3,700円</td><td>最も直接的な競合。IT基盤・DX推進で重複大</td></tr>
+        <tr><td>日立製作所</td><td>6501</td><td>総合電機・IT</td><td>4,897円</td><td>Lumada中心のDXシフト。規模感の近い総合電機</td></tr>
+        <tr><td>TIS</td><td>3626</td><td>SIer</td><td>3,199円</td><td>中堅SIerの代表格。SaaS売りの影響を比較</td></tr>
+        <tr><td>SCSK</td><td>9719</td><td>SIer</td><td>5,660円</td><td>住商系SIer。安定成長型との対比</td></tr>
+        <tr><td>三菱電機</td><td>6503</td><td>総合電機・防衛</td><td>5,467円</td><td>防衛関連の重複。FA/半導体で独自成長</td></tr>
+        <tr><td>NRI</td><td>4307</td><td>コンサル・SIer</td><td>3,930円</td><td>高付加価値SIの代表。SaaS売りの影響を比較</td></tr>
+        <tr><td>NTT</td><td>9432</td><td>通信・IT</td><td>153円</td><td>通信インフラの親会社。ディフェンシブとの対比</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>NTTデータ（9613）</b>はティッカー変更の影響でデータ取得不可のため今回は除外。本来はNECの最も近い比較対象の一つです。
+  </div>
+</section>
+
+<!-- ━━ ② モメンタム比較 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#fef3c7;color:#92400e">📉</span> 株価モメンタム比較 ─ どれだけ下がった？</h2>
+  <p class="lead">
+    各期間のリターンと、52週高値からの下落率を並べます。
+    「最近どれだけ売り込まれたか」が一目でわかります。
+  </p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>銘柄</th><th>株価</th><th>5日</th><th>20日</th><th>60日</th><th>高値比</th><th>傾向</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td>NEC</td><td>4,004</td>
+          <td class="r">-11.2%</td><td class="r">-33.3%</td><td class="r">-31.9%</td><td class="r">-35.4%</td>
+          <td><span class="pill pill-r">急落</span></td>
+        </tr>
+        <tr>
+          <td>富士通</td><td>3,700</td>
+          <td class="r">-7.9%</td><td class="r">-18.9%</td><td class="r">-11.7%</td><td class="r">-20.7%</td>
+          <td><span class="pill pill-a">下落</span></td>
+        </tr>
+        <tr>
+          <td>日立</td><td>4,897</td>
+          <td class="r">-15.8%</td><td class="r">-6.2%</td><td class="r">-4.4%</td><td class="r">-18.9%</td>
+          <td><span class="pill pill-a">調整</span></td>
+        </tr>
+        <tr>
+          <td>TIS</td><td>3,199</td>
+          <td class="r">-8.1%</td><td class="r">-34.5%</td><td class="r">-38.5%</td><td class="r">-40.7%</td>
+          <td><span class="pill pill-r">暴落</span></td>
+        </tr>
+        <tr>
+          <td>SCSK</td><td>5,660</td>
+          <td>-0.5%</td><td>-0.1%</td><td>-0.3%</td><td>-0.7%</td>
+          <td><span class="pill pill-g">横ばい</span></td>
+        </tr>
+        <tr>
+          <td>三菱電機</td><td>5,467</td>
+          <td class="r">-5.0%</td><td class="g">+7.2%</td><td class="g">+27.9%</td><td>-8.7%</td>
+          <td><span class="pill pill-g">上昇基調</span></td>
+        </tr>
+        <tr>
+          <td>NRI</td><td>3,930</td>
+          <td class="r">-7.0%</td><td class="r">-35.2%</td><td class="r">-37.9%</td><td class="r">-39.3%</td>
+          <td><span class="pill pill-r">暴落</span></td>
+        </tr>
+        <tr>
+          <td>NTT</td><td>153</td>
+          <td class="g">+0.4%</td><td>-3.2%</td><td>0.0%</td><td>-6.9%</td>
+          <td><span class="pill pill-g">安定</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:360px">
+    <canvas id="chartMomentum"></canvas>
+  </div>
+
+  <div class="tip">
+    <b>読み方：</b>
+    NEC・TIS・NRIは「SaaS/AI売り」を直撃し、20日で30%超の下落。
+    逆に三菱電機は防衛需要を追い風に上昇基調。SCSKとNTTはディフェンシブで安定。
+    <b>「大きく売り込まれた銘柄ほど反発余地が大きいが、さらに下がるリスクもある」</b>ことに注意。
+  </div>
+</section>
+
+<!-- ━━ ③ ボラ・テクニカル ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#fee2e2;color:#991b1b">⚡</span> ボラティリティ・テクニカル比較</h2>
+  <p class="lead">
+    値動きの荒さ（ボラティリティ）と、売られ過ぎ度（RSI）を比較します。
+    ボラが高い銘柄は「損切りに引っかかりやすい」ため、損切り幅の設計に直結します。
+  </p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>銘柄</th><th>20日ボラ<br>(年率)</th><th>ATR14<br>(対株価%)</th><th>RSI(14)</th><th>5MA上</th><th>20MA上</th><th>相場状態</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td>NEC</td><td class="r">75.2%</td><td class="r">7.2%</td><td class="r">23.9</td><td>×</td><td>×</td>
+          <td><span class="pill pill-r">売られ過ぎ・高ボラ</span></td>
+        </tr>
+        <tr><td>富士通</td><td class="n">53.2%</td><td>4.4%</td><td class="n">37.4</td><td>×</td><td>×</td><td><span class="pill pill-a">やや売られ過ぎ</span></td></tr>
+        <tr><td>日立</td><td class="n">54.8%</td><td>5.0%</td><td>45.7</td><td>×</td><td>×</td><td><span class="pill pill-a">中立・調整中</span></td></tr>
+        <tr><td>TIS</td><td class="r">63.8%</td><td>5.5%</td><td class="r">11.8</td><td>×</td><td>×</td><td><span class="pill pill-r">極度の売られ過ぎ</span></td></tr>
+        <tr><td>SCSK</td><td class="g">2.2%</td><td class="g">0.2%</td><td>50.6</td><td>×</td><td>×</td><td><span class="pill pill-g">超低ボラ</span></td></tr>
+        <tr><td>三菱電機</td><td>42.3%</td><td>3.6%</td><td class="n">68.9</td><td>×</td><td class="g">○</td><td><span class="pill pill-b">上昇トレンド</span></td></tr>
+        <tr><td>NRI</td><td class="r">70.0%</td><td class="r">6.3%</td><td class="r">11.6</td><td>×</td><td>×</td><td><span class="pill pill-r">極度の売られ過ぎ</span></td></tr>
+        <tr><td>NTT</td><td class="g">15.1%</td><td>1.4%</td><td>43.1</td><td>×</td><td>×</td><td><span class="pill pill-g">安定</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:340px">
+    <canvas id="chartVolRsi"></canvas>
+  </div>
+
+  <div class="tip tip-a">
+    <b>RSI（売られ過ぎ度）のランキング：</b><br>
+    NRI (11.6) &gt; TIS (11.8) &gt; NEC (23.9) &gt; 富士通 (37.4)<br>
+    NRI・TISはRSI 12前後と<b>歴史的な売られ過ぎ水準</b>。反発力は大きい可能性がある一方、
+    「落ちるナイフ」のリスクも最大です。
+  </div>
+</section>
+
+<!-- ━━ ④ バリュエーション ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#d1fae5;color:#065f46">💎</span> バリュエーション比較 ─ 割安なのはどこ？</h2>
+  <p class="lead">
+    PER（株価収益率）やPBR（株価純資産倍率）、アナリスト目標株価との乖離で割安度を比較します。
+  </p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>銘柄</th><th>PER<br>(実績)</th><th>PER<br>(予想)</th><th>PBR</th><th>アナリスト<br>目標乖離</th><th>評価</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td>NEC</td><td>22.7</td><td class="g">5.6</td><td>2.58</td><td class="g">+61.8%</td>
+          <td><span class="pill pill-g">大幅割安</span></td>
+        </tr>
+        <tr><td>富士通</td><td>22.7</td><td>24.4</td><td>3.25</td><td class="g">+34.1%</td><td><span class="pill pill-g">割安</span></td></tr>
+        <tr><td>日立</td><td>29.3</td><td>27.5</td><td>3.48</td><td class="g">+18.4%</td><td><span class="pill pill-a">やや割安</span></td></tr>
+        <tr><td>TIS</td><td class="g">14.0</td><td>15.4</td><td>2.18</td><td class="g">+67.2%</td><td><span class="pill pill-g">大幅割安</span></td></tr>
+        <tr><td>SCSK</td><td>28.8</td><td class="r">36.5</td><td class="r">5.58</td><td class="r">-14.3%</td><td><span class="pill pill-r">割高</span></td></tr>
+        <tr><td>三菱電機</td><td>28.7</td><td class="r">33.1</td><td>2.69</td><td class="r">-12.4%</td><td><span class="pill pill-r">割高</span></td></tr>
+        <tr><td>NRI</td><td>22.1</td><td>22.5</td><td>4.49</td><td class="g">+66.2%</td><td><span class="pill pill-g">大幅割安</span></td></tr>
+        <tr><td>NTT</td><td class="g">12.2</td><td class="g">10.5</td><td class="g">1.32</td><td class="g">+15.5%</td><td><span class="pill pill-a">やや割安</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:340px">
+    <canvas id="chartVal"></canvas>
+  </div>
+
+  <div class="tip">
+    <b>注目ポイント：</b>
+    NECの予想PER <b>5.6倍</b>は8社中で群を抜いて低い。これは今期の特殊要因（構造改革費用など）による一時的な歪みの可能性もあるため、
+    <b>来期の正常化EPSで見ると実質20倍前後</b>と推定されます。
+    アナリスト目標株価との乖離+62%は「プロはまだ上値余地を見ている」ことを示唆しますが、
+    目標株価の改定が追いついていない可能性にも注意。
+  </div>
+</section>
+
+<!-- ━━ ⑤ バックテスト ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#e0e7ff;color:#3730a3">📊</span> +10%到達バックテスト比較</h2>
+  <p class="lead">
+    全銘柄に同じルール（5MA上抜けエントリー、SL -5%、最大40営業日）を適用し、
+    「+10%に到達した割合（勝率）」を比較しました。
+  </p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>銘柄</th><th>トレード数</th><th>勝率</th><th>平均損益</th><th>評価</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>三菱電機</td><td>23</td><td class="g">73.9%</td><td class="g">+6.50%</td><td><span class="pill pill-g">最優秀</span></td></tr>
+        <tr><td>日立</td><td>30</td><td class="g">66.7%</td><td class="g">+5.00%</td><td><span class="pill pill-g">優秀</span></td></tr>
+        <tr class="hl"><td>NEC</td><td>26</td><td class="g">53.8%</td><td class="g">+3.08%</td><td><span class="pill pill-b">良好</span></td></tr>
+        <tr><td>富士通</td><td>26</td><td>42.3%</td><td class="g">+1.44%</td><td><span class="pill pill-a">及第点</span></td></tr>
+        <tr><td>SCSK</td><td>21</td><td>33.3%</td><td class="g">+1.57%</td><td><span class="pill pill-a">微妙</span></td></tr>
+        <tr><td>TIS</td><td>26</td><td class="r">26.9%</td><td class="n">+0.74%</td><td><span class="pill pill-r">低勝率</span></td></tr>
+        <tr><td>NRI</td><td>26</td><td class="r">26.9%</td><td class="r">-0.79%</td><td><span class="pill pill-r">期待値マイナス</span></td></tr>
+        <tr><td>NTT</td><td>37</td><td class="r">10.8%</td><td class="r">-0.24%</td><td><span class="pill pill-r">不適格</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:340px">
+    <canvas id="chartBT"></canvas>
+  </div>
+
+  <div class="tip">
+    <b>バックテストの読み方：</b><br>
+    三菱電機（74%）と日立（67%）が突出して高い勝率。これは上昇トレンドが強く、5MA上抜け後に素直に伸びやすいため。
+    <b>NECの54%は「トレード可能な水準」</b>で、ペイオフレシオ2.0倍と組み合わせれば期待値はプラスです。
+    NTTは値動きが小さすぎて40日で+10%に届かない（勝率11%）ため、この戦略には不向きです。
+  </div>
+</section>
+
+<!-- ━━ ⑥ 総合スコアリング ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#fef3c7;color:#92400e">🏆</span> 総合スコアリング</h2>
+  <p class="lead">
+    6つの観点（目標乖離、RSI、高値比、バックテスト勝率、ボラティリティ、PER）を
+    点数化して合計しました。高いほど「短期+10%トレードに向いている」と評価しています。
+  </p>
+
+  <div style="margin-top:16px">
+    <div class="score-row">
+      <span class="sr-name" style="color:var(--primary)">1. 富士通</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:70%;background:linear-gradient(90deg,#1a56db,#38bdf8)"></div></div>
+      <span class="sr-score" style="color:var(--primary)">+7</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+34% ★★★ ／ RSI37 やや売られ過ぎ ★ ／ 高値比-21% 反発余地 ★★ ／ BT勝率42% ★</div>
+
+    <div class="score-row">
+      <span class="sr-name" style="color:var(--green);font-weight:800">2. NEC</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:60%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+      <span class="sr-score" style="color:var(--green)">+6</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+62% ★★★ ／ RSI24 売られ過ぎ ★★ ／ BT勝率54% ★★ ／ PER予6倍 割安 ★ ／ ▼高値比-35% ▼Vol75%</div>
+
+    <div class="score-row">
+      <span class="sr-name">3. 日立</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:50%;background:linear-gradient(90deg,#6366f1,#a78bfa)"></div></div>
+      <span class="sr-score">+5</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+18% ★★ ／ 高値比-19% やや割安 ★ ／ BT勝率67% ★★</div>
+
+    <div class="score-row">
+      <span class="sr-name">4. TIS</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:40%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+      <span class="sr-score">+4</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+67% ★★★ ／ RSI12 売られ過ぎ ★★ ／ ▼高値比-41% ▼BT勝率27%</div>
+
+    <div class="score-row">
+      <span class="sr-name">4. NRI</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:40%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+      <span class="sr-score">+4</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+66% ★★★ ／ RSI12 売られ過ぎ ★★ ／ ▼高値比-39% ▼BT勝率27%</div>
+
+    <div class="score-row">
+      <span class="sr-name">6. 三菱電機</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:30%;background:linear-gradient(90deg,#94a3b8,#cbd5e1)"></div></div>
+      <span class="sr-score">+3</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">BT勝率74% ★★ ／ Vol42% 適度 ★ ／ 目標乖離-12%（すでに上昇）</div>
+
+    <div class="score-row">
+      <span class="sr-name">6. NTT</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:30%;background:linear-gradient(90deg,#94a3b8,#cbd5e1)"></div></div>
+      <span class="sr-score">+3</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離+15% ★★ ／ PER予11倍 割安 ★ ／ BT勝率11%（値動き小で+10%届かない）</div>
+
+    <div class="score-row">
+      <span class="sr-name" style="color:var(--sub)">8. SCSK</span>
+      <div class="sr-bar-bg"><div class="sr-bar" style="width:5%;background:#ef4444"></div></div>
+      <span class="sr-score" style="color:var(--red)">-1</span>
+    </div>
+    <div style="font-size:.76rem;color:var(--sub);padding:2px 0 8px 100px">目標乖離-14% ／ PER予37倍 割高 ▼ ／ ボラが低すぎて+10%に届きにくい</div>
+  </div>
+</section>
+
+<!-- ━━ ⑦ ヒートマップ ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#e0e7ff;color:#3730a3">🗺</span> 指標ヒートマップ</h2>
+  <p class="lead">各指標を色分け。緑＝トレードに有利、赤＝不利。一目で強み・弱みがわかります。</p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>銘柄</th><th>5日リターン</th><th>高値比</th><th>RSI</th><th>20日ボラ</th><th>BT勝率</th><th>目標乖離</th><th>PER予</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td>NEC</td>
+          <td class="heat-b">-11.2%</td>
+          <td class="heat-vb">-35.4%</td>
+          <td class="heat-vg">23.9</td>
+          <td class="heat-vb">75.2%</td>
+          <td class="heat-g">53.8%</td>
+          <td class="heat-vg">+61.8%</td>
+          <td class="heat-vg">5.6</td>
+        </tr>
+        <tr>
+          <td>富士通</td>
+          <td class="heat-b">-7.9%</td>
+          <td class="heat-b">-20.7%</td>
+          <td class="heat-g">37.4</td>
+          <td class="heat-n">53.2%</td>
+          <td class="heat-n">42.3%</td>
+          <td class="heat-vg">+34.1%</td>
+          <td class="heat-n">24.4</td>
+        </tr>
+        <tr>
+          <td>日立</td>
+          <td class="heat-vb">-15.8%</td>
+          <td class="heat-b">-18.9%</td>
+          <td class="heat-n">45.7</td>
+          <td class="heat-n">54.8%</td>
+          <td class="heat-vg">66.7%</td>
+          <td class="heat-g">+18.4%</td>
+          <td class="heat-n">27.5</td>
+        </tr>
+        <tr>
+          <td>TIS</td>
+          <td class="heat-b">-8.1%</td>
+          <td class="heat-vb">-40.7%</td>
+          <td class="heat-vg">11.8</td>
+          <td class="heat-b">63.8%</td>
+          <td class="heat-vb">26.9%</td>
+          <td class="heat-vg">+67.2%</td>
+          <td class="heat-g">15.4</td>
+        </tr>
+        <tr>
+          <td>SCSK</td>
+          <td class="heat-g">-0.5%</td>
+          <td class="heat-vg">-0.7%</td>
+          <td class="heat-n">50.6</td>
+          <td class="heat-vg">2.2%</td>
+          <td class="heat-b">33.3%</td>
+          <td class="heat-vb">-14.3%</td>
+          <td class="heat-vb">36.5</td>
+        </tr>
+        <tr>
+          <td>三菱電機</td>
+          <td class="heat-n">-5.0%</td>
+          <td class="heat-g">-8.7%</td>
+          <td class="heat-b">68.9</td>
+          <td class="heat-g">42.3%</td>
+          <td class="heat-vg">73.9%</td>
+          <td class="heat-vb">-12.4%</td>
+          <td class="heat-vb">33.1</td>
+        </tr>
+        <tr>
+          <td>NRI</td>
+          <td class="heat-b">-7.0%</td>
+          <td class="heat-vb">-39.3%</td>
+          <td class="heat-vg">11.6</td>
+          <td class="heat-vb">70.0%</td>
+          <td class="heat-vb">26.9%</td>
+          <td class="heat-vg">+66.2%</td>
+          <td class="heat-n">22.5</td>
+        </tr>
+        <tr>
+          <td>NTT</td>
+          <td class="heat-vg">+0.4%</td>
+          <td class="heat-vg">-6.9%</td>
+          <td class="heat-n">43.1</td>
+          <td class="heat-vg">15.1%</td>
+          <td class="heat-vb">10.8%</td>
+          <td class="heat-g">+15.5%</td>
+          <td class="heat-vg">10.5</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>ヒートマップの見方：</b>
+    RSI・目標乖離は「低い/大きいほど緑」（反発余地が大きい）。
+    ボラティリティは「適度（30〜50%）が緑、高すぎは赤」。
+    BT勝率・PERは「良いほど緑」。
+    NECは<b>目標乖離・RSI・PERで濃い緑</b>だが、<b>ボラの赤</b>が足を引っ張る構図です。
+  </div>
+</section>
+
+<!-- ━━ ⑧ まとめ ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:#d1fae5;color:#065f46">✅</span> 総合まとめ ─ NECは買いか？</h2>
+
+  <div style="background:linear-gradient(135deg,#f0f7ff,#e8eefb);border-radius:14px;padding:24px 28px;margin:16px 0">
+    <h3 style="font-size:1.05rem;margin-bottom:12px;color:var(--primary)">NECの強みと弱み（8社比較から見えたこと）</h3>
+    <div class="grid2" style="gap:16px">
+      <div>
+        <p style="font-weight:700;color:var(--green);margin-bottom:6px">強み</p>
+        <ul style="font-size:.86rem;padding-left:1.2em;line-height:1.8">
+          <li>アナリスト目標株価との乖離 <b>+62%</b>（8社中2位）</li>
+          <li>予想PER <b>5.6倍</b>（8社中最低＝最も割安）</li>
+          <li>RSI 23.9 で<b>反発しやすい水準</b></li>
+          <li>BT勝率 <b>54%</b> で期待値プラス圏</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;color:var(--red);margin-bottom:6px">弱み</p>
+        <ul style="font-size:.86rem;padding-left:1.2em;line-height:1.8">
+          <li>20日ボラ <b>75%</b>（8社中ワースト＝損切りされやすい）</li>
+          <li>高値からの下落率 <b>-35%</b>（トレンドが完全に崩壊）</li>
+          <li>SaaS/AI関連の構造的売りがまだ続く可能性</li>
+          <li>5MA・20MAともに下＝<b>下降トレンドのど真ん中</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:linear-gradient(135deg,#f0fdf4,#d1fae5);border-radius:14px;padding:24px 28px;margin:16px 0">
+    <h3 style="font-size:1.05rem;margin-bottom:12px;color:#065f46">結論：NEC vs 代替銘柄の優先順位</h3>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>順位</th><th>銘柄</th><th>推奨度</th><th>理由</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><b>富士通</b></td><td><span class="pill pill-g">最優先</span></td><td>目標乖離+34%、ボラが適度、下落率-21%で「底が見えやすい」</td></tr>
+          <tr class="hl"><td>2</td><td><b>NEC</b></td><td><span class="pill pill-b">有力</span></td><td>割安度トップだが、ボラが高く反転確認が必須</td></tr>
+          <tr><td>3</td><td><b>日立</b></td><td><span class="pill pill-b">有力</span></td><td>BT勝率67%で信頼性高い。下落幅は小さくリバウンド幅も限定的</td></tr>
+          <tr><td>4</td><td><b>TIS / NRI</b></td><td><span class="pill pill-a">ハイリスク</span></td><td>割安度は最大だがBT勝率27%。下落トレンドが止まる保証なし</td></tr>
+          <tr><td>5</td><td>三菱電機</td><td><span class="pill pill-a">見送り</span></td><td>BT勝率74%は素晴らしいが、すでに高値圏で割高。新規エントリーには不向き</td></tr>
+          <tr><td>6</td><td>SCSK / NTT</td><td><span class="pill pill-r">不適格</span></td><td>ボラが低すぎて40日で+10%に到達しない</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tip">
+    <b>最終的な推奨：</b><br>
+    「反転確認後に1銘柄だけ買う」なら<b>富士通</b>がリスク/リターンのバランスが最も良い。<br>
+    「2銘柄に分散」するなら<b>富士通＋NEC</b>の組み合わせ。<br>
+    NECは割安度が際立つが、ボラの高さから<b>5MA上抜けを確認するまで待つべき</b>。
+    「とにかく今すぐ買いたい」場合のリスクは、富士通のほうが明確に低いです。
+  </div>
+</section>
+
+<footer class="footer">
+  <p>本レポートは過去のデータに基づく定量分析であり、将来の投資成果を保証するものではありません。投資判断は必ずご自身の責任で行ってください。</p>
+  <p style="margin-top:6px">Generated on 2026-02-18 ／ Data: yfinance ／ Analysis: GT-SOAR</p>
+</footer>
+
+</div>
+
+<!-- ━━━━━━ Charts ━━━━━━ -->
+<script>
+const C={blue:'#1a56db',sky:'#0ea5e9',green:'#10b981',red:'#ef4444',amber:'#f59e0b',purple:'#8b5cf6',
+  blueBg:'rgba(26,86,219,.14)',greenBg:'rgba(16,185,129,.14)',redBg:'rgba(239,68,68,.14)',amberBg:'rgba(245,158,11,.14)'};
+Chart.defaults.font.family='"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif';
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+
+const names=['NEC','富士通','日立','TIS','SCSK','三菱電機','NRI','NTT'];
+const nColors=['#10b981','#1a56db','#6366f1','#f59e0b','#94a3b8','#ec4899','#8b5cf6','#64748b'];
+const nBg=nColors.map(c=>c+'22');
+
+// Momentum
+new Chart(document.getElementById('chartMomentum'),{
+  type:'bar',
+  data:{
+    labels:names,
+    datasets:[
+      {label:'5日',data:[-11.2,-7.9,-15.8,-8.1,-0.5,-5.0,-7.0,0.4],backgroundColor:C.redBg,borderColor:C.red,borderWidth:1.5,borderRadius:4},
+      {label:'20日',data:[-33.3,-18.9,-6.2,-34.5,-0.1,7.2,-35.2,-3.2],backgroundColor:C.amberBg,borderColor:C.amber,borderWidth:1.5,borderRadius:4},
+      {label:'60日',data:[-31.9,-11.7,-4.4,-38.5,-0.3,27.9,-37.9,0.0],backgroundColor:C.blueBg,borderColor:C.blue,borderWidth:1.5,borderRadius:4}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    interaction:{mode:'index',intersect:false},
+    plugins:{title:{display:true,text:'期間別リターン比較（%）',font:{size:13,weight:'bold'}}},
+    scales:{y:{title:{display:true,text:'%'},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}
+  }
+});
+
+// Vol vs RSI scatter
+new Chart(document.getElementById('chartVolRsi'),{
+  type:'bubble',
+  data:{
+    datasets: names.map((n,i)=>({
+      label:n,
+      data:[{
+        x:[75.2,53.2,54.8,63.8,2.2,42.3,70.0,15.1][i],
+        y:[23.9,37.4,45.7,11.8,50.6,68.9,11.6,43.1][i],
+        r: 10
+      }],
+      backgroundColor: nColors[i]+'88',
+      borderColor: nColors[i],
+      borderWidth: 2,
+    }))
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{
+      title:{display:true,text:'20日ボラティリティ vs RSI（左下ほど「売られ過ぎ＋荒い」）',font:{size:13,weight:'bold'}},
+      legend:{position:'bottom',labels:{font:{size:10}}}
+    },
+    scales:{
+      x:{title:{display:true,text:'20日ボラティリティ（年率 %）'},min:0,max:85,grid:{color:'rgba(0,0,0,.04)'}},
+      y:{title:{display:true,text:'RSI(14)'},min:0,max:80,grid:{color:'rgba(0,0,0,.04)'}}
+    }
+  }
+});
+
+// Valuation
+new Chart(document.getElementById('chartVal'),{
+  type:'bar',
+  data:{
+    labels:names,
+    datasets:[
+      {label:'目標乖離(%)',data:[61.8,34.1,18.4,67.2,-14.3,-12.4,66.2,15.5],backgroundColor:C.greenBg,borderColor:C.green,borderWidth:2,borderRadius:5,yAxisID:'y'},
+      {label:'PER予想(倍)',data:[5.6,24.4,27.5,15.4,36.5,33.1,22.5,10.5],backgroundColor:C.blueBg,borderColor:C.blue,borderWidth:2,borderRadius:5,yAxisID:'y1',type:'line',tension:.3,pointBackgroundColor:C.blue}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    interaction:{mode:'index',intersect:false},
+    plugins:{title:{display:true,text:'アナリスト目標乖離（棒）vs 予想PER（線）',font:{size:13,weight:'bold'}}},
+    scales:{
+      y:{title:{display:true,text:'目標乖離 %'},grid:{color:'rgba(0,0,0,.04)'}},
+      y1:{position:'right',title:{display:true,text:'PER（倍）'},grid:{display:false},min:0,max:40},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// Backtest
+new Chart(document.getElementById('chartBT'),{
+  type:'bar',
+  data:{
+    labels:['三菱電機','日立','NEC','富士通','SCSK','TIS','NRI','NTT'],
+    datasets:[
+      {label:'勝率(%)',data:[73.9,66.7,53.8,42.3,33.3,26.9,26.9,10.8],
+       backgroundColor:['#ec489944','#6366f144','#10b98144','#1a56db44','#94a3b844','#f59e0b44','#8b5cf644','#64748b44'],
+       borderColor:['#ec4899','#6366f1','#10b981','#1a56db','#94a3b8','#f59e0b','#8b5cf6','#64748b'],
+       borderWidth:2,borderRadius:6},
+      {label:'平均損益(%)',data:[6.5,5.0,3.08,1.44,1.57,0.74,-0.79,-0.24],
+       backgroundColor:'rgba(0,0,0,0)',borderColor:'#1e293b',borderWidth:2,type:'line',tension:.3,
+       pointBackgroundColor:function(ctx){return ctx.raw>=0?C.green:C.red},pointRadius:5,yAxisID:'y1'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{title:{display:true,text:'+10%到達バックテスト（5MA上抜け, SL-5%, 40日）',font:{size:13,weight:'bold'}}},
+    scales:{
+      y:{title:{display:true,text:'勝率 %'},min:0,max:80,grid:{color:'rgba(0,0,0,.04)'}},
+      y1:{position:'right',title:{display:true,text:'平均損益 %'},grid:{display:false}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>

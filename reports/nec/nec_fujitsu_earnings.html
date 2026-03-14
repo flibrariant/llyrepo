@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEC vs 富士通 決算分析レポート</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#f4f6fa;--card:#fff;--primary:#1a56db;--pl:#e8eefb;
+    --green:#10b981;--gl:#d1fae5;--red:#ef4444;--rl:#fee2e2;
+    --amber:#f59e0b;--al:#fef3c7;--purple:#7c3aed;--purl:#ede9fe;
+    --text:#1e293b;--sub:#64748b;--border:#e2e8f0;
+    --r:16px;--sh:0 1px 3px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04);
+    --shl:0 4px 24px rgba(0,0,0,.08);
+    --nec:#10b981;--fujitsu:#ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.72;-webkit-font-smoothing:antialiased}
+
+  .hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 40%,#1a56db 100%);color:#fff;padding:52px 24px 44px;text-align:center;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 25%,rgba(255,255,255,.08) 0%,transparent 55%)}
+  .hero h1{font-size:clamp(1.4rem,3.6vw,2.1rem);font-weight:800;position:relative;z-index:1}
+  .hero .sub{margin-top:6px;font-size:.9rem;opacity:.8;position:relative;z-index:1}
+  .hero .badge{display:inline-block;margin-top:12px;padding:3px 14px;background:rgba(255,255,255,.14);border-radius:999px;font-size:.78rem;position:relative;z-index:1}
+
+  .container{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+
+  /* Verdict */
+  .verdict{margin:-28px auto 28px;position:relative;z-index:2;max-width:1060px;padding:0 20px}
+  .verdict-inner{background:var(--card);border-radius:var(--r);box-shadow:var(--shl);padding:26px 30px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:640px){.verdict-inner{grid-template-columns:1fr}}
+  .v-box{border-radius:12px;padding:20px 22px}
+  .v-box.nec{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #a7f3d0}
+  .v-box.fj{background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fca5a5}
+  .v-box h3{font-size:1rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .v-box .verdict-text{font-size:.86rem;line-height:1.6}
+
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:28px 30px;margin-bottom:24px}
+  .card h2{font-size:1.1rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card h2 .ic{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.86rem;flex-shrink:0}
+  .card .lead{color:var(--sub);font-size:.84rem;margin-bottom:16px}
+
+  .tw{overflow-x:auto;margin:12px -4px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  thead th{background:var(--pl);color:var(--primary);font-weight:600;padding:8px 11px;text-align:center;white-space:nowrap;border-bottom:2px solid var(--primary)}
+  thead th:first-child{text-align:left;border-radius:8px 0 0 0}
+  thead th:last-child{border-radius:0 8px 0 0}
+  td{padding:8px 11px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+  td:first-child{text-align:left;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.hl{background:#f0f7ff}
+
+  .g{color:var(--green);font-weight:600}.r{color:var(--red);font-weight:600}.n{color:var(--amber);font-weight:600}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:600}
+  .pill-g{background:var(--gl);color:#065f46}.pill-r{background:var(--rl);color:#991b1b}
+  .pill-a{background:var(--al);color:#92400e}.pill-b{background:var(--pl);color:var(--primary)}
+  .pill-p{background:var(--purl);color:#5b21b6}
+
+  .tip{background:#eff6ff;border-left:4px solid var(--primary);border-radius:0 12px 12px 0;padding:13px 17px;margin:14px 0;font-size:.84rem;line-height:1.65}
+  .tip b{color:var(--primary)}
+  .tip-a{background:#fffbeb;border-left-color:var(--amber)}.tip-a b{color:#92400e}
+  .tip-r{background:#fef2f2;border-left-color:var(--red)}.tip-r b{color:#991b1b}
+  .tip-g{background:#f0fdf4;border-left-color:var(--green)}.tip-g b{color:#065f46}
+  .tip-p{background:#f5f3ff;border-left-color:var(--purple)}.tip-p b{color:#5b21b6}
+
+  .chart-box{position:relative;width:100%;max-height:360px;margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:660px){.grid2{grid-template-columns:1fr}}
+
+  .meter{height:24px;background:#f1f5f9;border-radius:8px;overflow:hidden;position:relative;margin:6px 0}
+  .meter-bar{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.72rem;font-weight:700;color:#fff;transition:width .6s ease}
+  .meter-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--sub)}
+
+  .flag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:.78rem;font-weight:600;margin:2px 4px 2px 0}
+  .flag-ok{background:#d1fae5;color:#065f46}
+  .flag-warn{background:#fef3c7;color:#92400e}
+  .flag-bad{background:#fee2e2;color:#991b1b}
+
+  .compare-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .compare-row:last-child{border-bottom:none}
+  .cr-label{width:140px;font-size:.84rem;font-weight:600;flex-shrink:0}
+  .cr-val{flex:1;text-align:center;font-size:.88rem;font-weight:700}
+
+  .footer{text-align:center;padding:28px 20px;font-size:.76rem;color:var(--sub);border-top:1px solid var(--border);margin-top:36px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>NEC vs 富士通 ─ 決算徹底分析</h1>
+  <p class="sub">2025年度 第3四半期（2026年1月29日発表）の決算を深掘りし、通期達成可能性と上振れ余地を評価</p>
+  <span class="badge">基準日 2026-02-18 ／ 両社とも2026年3月期</span>
+</header>
+
+<!-- Verdict -->
+<div class="verdict">
+  <div class="verdict-inner">
+    <div class="v-box nec">
+      <h3><span style="font-size:1.1rem">🟢</span> NEC（6701）</h3>
+      <div class="verdict-text">
+        <b>通期達成：高確率</b>（上方修正済、Q4偏重の季節性で十分到達圏内）<br>
+        <b>さらなる上振れ：あり得る</b>（ANS・BluStellar好調。テレコム構造改革180億円の一過性費用を除けば実質的な利益力は予想以上）<br>
+        <b>おかしな動き：</b>基地局事業撤退に伴う構造改革費用180億円は<span class="flag flag-ok">ポジティブな整理</span>。不健全な兆候なし。
+      </div>
+    </div>
+    <div class="v-box fj">
+      <h3><span style="font-size:1.1rem">🔴</span> 富士通（6702）</h3>
+      <div class="verdict-text">
+        <b>通期達成：ほぼ確実</b>（純利益進捗率81%と異常に高い。調整後営業利益60%はQ4偏重で到達可能）<br>
+        <b>さらなる上振れ：純利益は大幅上振れの可能性</b>（進捗率81%は通期予想が保守的すぎる示唆）<br>
+        <b>おかしな動き：</b>純利益3,436億円（前年比290%増）の内訳は<span class="flag flag-warn">要精査</span>。事業売却益やクロスシェア解消益など一過性が含まれる可能性。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ━━ ① 3Q累計 業績比較 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--pl);color:var(--primary)">📊</span> 3Q累計業績 ─ 横並び比較</h2>
+  <p class="lead">同じIFRS基準で発表された両社の9ヶ月（4-12月）累計を並べます。</p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th>項目</th>
+          <th colspan="3" style="background:#d1fae533">NEC</th>
+          <th colspan="3" style="background:#fee2e233">富士通</th>
+        </tr>
+        <tr>
+          <th></th><th>3Q累計</th><th>前年比</th><th>通期予想</th>
+          <th>3Q累計</th><th>前年比</th><th>通期予想</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>売上収益</td>
+          <td>2兆4,223億</td><td class="g">+4.3%</td><td>3兆5,600億</td>
+          <td>2兆4,511億</td><td class="g">+1.8%</td><td>3兆5,300億</td>
+        </tr>
+        <tr>
+          <td>調整後営業利益</td>
+          <td>2,060億</td><td class="g">+37.1%</td><td>3,400億</td>
+          <td>2,291億</td><td class="g">+67.1%</td><td>3,800億</td>
+        </tr>
+        <tr>
+          <td>営業利益</td>
+          <td>1,851億</td><td class="g">+46.8%</td><td>─</td>
+          <td>2,110億</td><td class="g">+99.4%</td><td>3,600億</td>
+        </tr>
+        <tr>
+          <td>当期純利益</td>
+          <td>1,422億</td><td class="g">+98.8%</td><td>─</td>
+          <td>3,436億</td><td class="g">+290.3%</td><td>4,250億</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:320px">
+    <canvas id="chart3Q"></canvas>
+  </div>
+
+  <div class="tip">
+    <b>両社とも大幅増益だが、質が違う：</b><br>
+    NECは調整後営業利益+37%と本業の改善が中心。
+    富士通は当期純利益+290%と異常な伸び → 本業以外の利益（事業再編益やクロスシェア解消など）が押し上げている可能性が高い。
+    <b>本業の稼ぐ力を見るには「調整後営業利益」で比較するのが適切</b>です。
+  </div>
+</section>
+
+<!-- ━━ ② 進捗率分析 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--al);color:#92400e">📈</span> 通期予想への進捗率 ─ 達成できそうか？</h2>
+  <p class="lead">
+    「3Q累計 ÷ 通期予想」で進捗率を計算します。
+    3Qまでで75%を超えていれば「順調」、それ以下なら「Q4頼み」です。
+    ただし、日本のIT企業は官公庁の年度末需要で<b>Q4（1-3月）に売上・利益が偏る</b>傾向があります。
+  </p>
+
+  <div class="grid2">
+    <!-- NEC -->
+    <div style="border:1px solid #a7f3d0;border-radius:14px;padding:18px 20px">
+      <h4 style="color:var(--nec);margin-bottom:12px">NEC 進捗率</h4>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">売上収益：68.0%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:68%;background:linear-gradient(90deg,#10b981,#34d399)">68%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub);margin-bottom:12px">2兆4,223億 / 3兆5,600億 → Q4に1兆1,377億必要</div>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">調整後営業利益：60.6%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:60.6%;background:linear-gradient(90deg,#f59e0b,#fbbf24)">60.6%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub);margin-bottom:12px">2,060億 / 3,400億 → Q4に1,340億必要</div>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">Non-GAAP営業利益：58.3%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:58.3%;background:linear-gradient(90deg,#f59e0b,#fbbf24)">58.3%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub)">2,099億 / 3,600億 → Q4に1,501億必要</div>
+    </div>
+
+    <!-- 富士通 -->
+    <div style="border:1px solid #fca5a5;border-radius:14px;padding:18px 20px">
+      <h4 style="color:var(--fujitsu);margin-bottom:12px">富士通 進捗率</h4>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">売上収益：69.4%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:69.4%;background:linear-gradient(90deg,#ef4444,#f87171)">69.4%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub);margin-bottom:12px">2兆4,511億 / 3兆5,300億 → Q4に1兆789億必要</div>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">調整後営業利益：60.3%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:60.3%;background:linear-gradient(90deg,#f59e0b,#fbbf24)">60.3%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub);margin-bottom:12px">2,291億 / 3,800億 → Q4に1,509億必要</div>
+
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:2px">当期純利益：80.8%</div>
+      <div class="meter">
+        <div class="meter-bar" style="width:80.8%;background:linear-gradient(90deg,#10b981,#34d399)">80.8%</div>
+      </div>
+      <div style="font-size:.72rem;color:var(--sub)">3,436億 / 4,250億 → Q4に814億で通期達成</div>
+    </div>
+  </div>
+
+  <div class="chart-box" style="max-height:300px;margin-top:20px">
+    <canvas id="chartProgress"></canvas>
+  </div>
+
+  <div class="tip tip-a">
+    <b>進捗率60〜69%は「遅い」のか？</b><br>
+    一般的には3Qで75%が目安ですが、NECと富士通はともに<b>Q4偏重型</b>の季節パターンを持っています。
+    これは官公庁・大企業のシステム投資が年度末（3月）に集中するためです。<br><br>
+    <b>前年の実績：</b><br>
+    ・NEC 前年3Q進捗率（調整後営業利益）：約52% → 通期達成 ✓<br>
+    ・富士通 前年3Q進捗率（調整後営業利益）：約51% → 通期達成 ✓<br><br>
+    今年は前年よりも進捗率が<b>約9ポイント改善</b>しており、通期達成はほぼ確実と判断できます。
+  </div>
+</section>
+
+<!-- ━━ ③ セグメント分析 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--gl);color:#065f46">🔍</span> セグメント別 ─ どこが稼いでいるか？</h2>
+  <p class="lead">両社の事業セグメントを分解し、成長ドライバーと懸念点を特定します。</p>
+
+  <!-- NEC セグメント -->
+  <h3 style="margin:20px 0 10px;font-size:.98rem;color:var(--nec)">NEC セグメント別（3Q累計）</h3>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>セグメント</th><th>売上収益</th><th>前年比</th><th>調整後営利</th><th>前年比</th><th>評価</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ITサービス（全体）</td><td>1兆7,117億</td><td class="g">+2.7%</td>
+          <td>1,957億</td><td class="g">+768億</td>
+          <td><span class="pill pill-g">好調</span></td>
+        </tr>
+        <tr class="hl">
+          <td>&nbsp;&nbsp;└ 国内IT</td><td>1兆4,728億</td><td class="g">+2.9%</td>
+          <td>1,705億</td><td class="g">+630億</td>
+          <td><span class="pill pill-g">絶好調</span></td>
+        </tr>
+        <tr class="hl">
+          <td>&nbsp;&nbsp;&nbsp;&nbsp;└ BluStellar</td><td>4,669億</td><td class="g">+25.7%</td>
+          <td>626億</td><td class="g">+206億</td>
+          <td><span class="pill pill-g">急成長</span></td>
+        </tr>
+        <tr>
+          <td>社会インフラ（全体）</td><td>6,182億</td><td class="g">+9.5%</td>
+          <td>279億</td><td class="r">-115億</td>
+          <td><span class="pill pill-a">減益注意</span></td>
+        </tr>
+        <tr class="hl">
+          <td>&nbsp;&nbsp;└ ANS（防衛・宇宙）</td><td>3,520億</td><td class="g">+25.3%</td>
+          <td>278億</td><td class="g">+229億</td>
+          <td><span class="pill pill-g">急成長</span></td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;└ テレコム</td><td>─</td><td>─</td>
+          <td>─</td><td class="r">構造改革-180億</td>
+          <td><span class="pill pill-r">撤退整理</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 富士通 セグメント -->
+  <h3 style="margin:24px 0 10px;font-size:.98rem;color:var(--fujitsu)">富士通 セグメント別（3Q累計）</h3>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>セグメント</th><th>売上収益</th><th>前年比</th><th>調整後営利</th><th>利益率</th><th>評価</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td>サービスソリューション</td><td>1兆6,577億</td><td class="g">+6.1%</td>
+          <td>2,161億</td><td class="g">13.0%</td>
+          <td><span class="pill pill-g">過去最高益</span></td>
+        </tr>
+        <tr class="hl">
+          <td>&nbsp;&nbsp;└ Uvance</td><td>4,927億</td><td class="g">+53.2%</td>
+          <td>─</td><td>─</td>
+          <td><span class="pill pill-g">急成長</span></td>
+        </tr>
+        <tr class="hl">
+          <td>&nbsp;&nbsp;└ モダナイゼーション</td><td>2,665億</td><td class="g">+43%</td>
+          <td>─</td><td>─</td>
+          <td><span class="pill pill-g">急成長</span></td>
+        </tr>
+        <tr>
+          <td>ハードウェアソリューション</td><td>6,729億</td><td class="r">-5.6%</td>
+          <td>370億</td><td>5.5%</td>
+          <td><span class="pill pill-a">減収だが増益</span></td>
+        </tr>
+        <tr>
+          <td>ユビキタスソリューション</td><td>1,779億</td><td class="r">-1.9%</td>
+          <td>314億</td><td class="g">+54.6%増</td>
+          <td><span class="pill pill-b">堅調</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-box" style="max-height:320px;margin-top:20px">
+    <canvas id="chartSegment"></canvas>
+  </div>
+
+  <div class="tip tip-g">
+    <b>成長ドライバーの比較：</b><br>
+    ・NEC の <b>BluStellar</b>（DX支援）：売上+25.7%、IT売上の32%に成長<br>
+    ・富士通の <b>Uvance</b>（DX支援）：売上+53.2%、受注も+45%<br>
+    両社ともDX関連の新ブランドが急成長しており、構造的な成長トレンドは本物。
+    <b>富士通のUvanceの成長率(+53%)がNEC BluStellar(+26%)を上回る</b>が、これは規模が小さい段階での高成長率という側面もあります。
+  </div>
+</section>
+
+<!-- ━━ ④ おかしな動きの検証 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--rl);color:#991b1b">🚨</span> おかしな動きはないか？ ─ 異常値チェック</h2>
+  <p class="lead">決算数値に不自然な点や、見落としがちなリスクがないかを検証します。</p>
+
+  <!-- NEC -->
+  <div style="border:1px solid #a7f3d0;border-radius:14px;padding:18px 20px;margin:14px 0">
+    <h4 style="color:var(--nec);margin-bottom:10px">NEC ─ チェック項目</h4>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-warn">要確認</span>
+      <b>テレコムサービス構造改革費用 180億円</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        基地局事業からの撤退に伴う一過性費用。
+        これは<b>ネガティブではなくポジティブな経営判断</b>。低採算事業を整理し、vRAN・ソフトウェアに集中する戦略。
+        Q3に一括計上しているため、Q4以降は反動でクリーンな利益が出やすい。
+      </span>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-ok">健全</span>
+      <b>社会インフラの減益（-115億円）</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        テレコム構造改革費用180億円が主因。ANS（防衛）は+229億円と絶好調で、
+        構造改革費用を除けば社会インフラ全体も増益。
+        防衛予算増が追い風で、この成長は一時的でなく構造的。
+      </span>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-ok">健全</span>
+      <b>国内IT受注が前年比-1%</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        一見マイナスだが、<b>特殊要因（前年の大型案件の反動）を除くと+4%</b>。
+        エンタープライズに限ると+15%。受注残も積み上がっており、Q4の売上着地に問題なし。
+      </span>
+    </div>
+
+    <div>
+      <span class="flag flag-ok">ポジティブ</span>
+      <b>当期純利益が前年比+98.8%（ほぼ倍増）</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        本業の利益改善が主因。税効果の影響もあるが、営業利益+47%の増益が着実に純利益に波及。
+        不自然な一過性利益の計上は見受けられない。
+      </span>
+    </div>
+  </div>
+
+  <!-- 富士通 -->
+  <div style="border:1px solid #fca5a5;border-radius:14px;padding:18px 20px;margin:14px 0">
+    <h4 style="color:var(--fujitsu);margin-bottom:10px">富士通 ─ チェック項目</h4>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-warn">要精査</span>
+      <b>当期純利益3,436億円（前年比+290%）─ 異常な伸び</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        調整後営業利益は+67%で着実な伸びなのに、当期純利益は+290%。
+        この乖離は<b>営業外の一過性利益</b>が含まれている可能性を示唆。
+        富士通は2024年度に事業ポートフォリオ再編（子会社売却、クロスシェア解消）を進めており、
+        これらの売却益が純利益を押し上げていると推定される。<br>
+        <b>→ 来期の純利益は反動で大幅減益のリスク</b>がある。
+      </span>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-ok">健全</span>
+      <b>サービスソリューションの利益率13.0%（過去最高）</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        本業の稼ぐ力は確実に向上。Uvance(+53%)とモダナイゼーション(+43%)が牽引。
+        これは構造的な改善であり、持続性がある。
+      </span>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <span class="flag flag-warn">注意</span>
+      <b>ハードウェアソリューションの売上-5.6%</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        サーバー・ネットワーク機器の減収。ただし利益率は改善しており、
+        低採算案件の整理が進んでいる証拠。
+        売上減少が加速しなければ問題ないが、AIサーバー競争での立ち位置は要注目。
+      </span>
+    </div>
+
+    <div>
+      <span class="flag flag-ok">ポジティブ</span>
+      <b>受注残高1兆1,457億円（前年比+6%）</b><br>
+      <span style="font-size:.84rem;color:var(--sub)">
+        2026年度以降の売上予定額7,285億円（+7%）も含め、
+        パイプラインは健全。来期の売上成長の裏付けがある。
+      </span>
+    </div>
+  </div>
+
+  <div class="tip tip-r">
+    <b>最大の注意点：富士通の純利益構造</b><br>
+    富士通の純利益進捗率 <b>80.8%</b>は、裏を返せば「通期予想が保守的すぎる」か「一過性利益が含まれている」かのどちらか。
+    前者なら上方修正余地あり、後者なら来期の反動減に注意。
+    <b>投資判断には「調整後営業利益ベース」で比較すべき</b>です。
+  </div>
+</section>
+
+<!-- ━━ ⑤ 通期達成可能性の定量評価 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--purl);color:var(--purple)">🎯</span> 通期予想の達成可能性 ─ Q4に何が必要か？</h2>
+  <p class="lead">Q4（1-3月）に必要な売上・利益を計算し、過去のQ4実績と比較して達成確率を判定します。</p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>項目</th><th colspan="2" style="background:#d1fae533">NEC</th><th colspan="2" style="background:#fee2e233">富士通</th></tr>
+        <tr><th></th><th>Q4必要額</th><th>判定</th><th>Q4必要額</th><th>判定</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>売上収益</td>
+          <td>1兆1,377億</td>
+          <td><span class="pill pill-g">達成可能</span></td>
+          <td>1兆789億</td>
+          <td><span class="pill pill-g">達成可能</span></td>
+        </tr>
+        <tr>
+          <td>調整後営業利益</td>
+          <td>1,340億</td>
+          <td><span class="pill pill-g">達成可能</span></td>
+          <td>1,509億</td>
+          <td><span class="pill pill-g">達成可能</span></td>
+        </tr>
+        <tr>
+          <td>当期純利益</td>
+          <td>─</td>
+          <td><span class="pill pill-b">非開示</span></td>
+          <td>814億</td>
+          <td><span class="pill pill-g">余裕あり</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div style="background:#f0fdf4;border-radius:12px;padding:18px 20px">
+      <h4 style="color:var(--nec);font-size:.92rem;margin-bottom:8px">NEC Q4の実現性</h4>
+      <ul style="font-size:.84rem;padding-left:1.2em;line-height:1.8">
+        <li>前年Q4売上：約1兆600億円 → 今年はQ4に1兆1,377億円必要（前年比+7%程度）</li>
+        <li>前年Q4の調整後営業利益：約1,370億円 → 今年は1,340億円必要（前年とほぼ同水準）</li>
+        <li>受注残の積み上がりとBluStellar・ANSの成長トレンドを考慮すれば<b>十分到達圏内</b></li>
+        <li>構造改革180億円はQ3で計上済み → <b>Q4はクリーンに利益が出る</b></li>
+      </ul>
+      <p style="margin-top:8px;font-weight:700;color:var(--nec)">達成確率：90%以上</p>
+    </div>
+
+    <div style="background:#fef2f2;border-radius:12px;padding:18px 20px">
+      <h4 style="color:var(--fujitsu);font-size:.92rem;margin-bottom:8px">富士通 Q4の実現性</h4>
+      <ul style="font-size:.84rem;padding-left:1.2em;line-height:1.8">
+        <li>前年Q4売上：約1兆1,000億円 → 今年はQ4に1兆789億円必要（前年比-2%でも達成）</li>
+        <li>前年Q4の調整後営業利益：約1,680億円 → 今年は1,509億円必要（前年以下でOK）</li>
+        <li>純利益は残り814億円のみ → 前年Q4は約700億円なので<b>ほぼ確実に超える</b></li>
+        <li>Uvance受注+45%の裏付けあり</li>
+      </ul>
+      <p style="margin-top:8px;font-weight:700;color:var(--fujitsu)">達成確率：95%以上</p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━ ⑥ さらなる上振れ可能性 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--gl);color:#065f46">🚀</span> 予想をさらに上回る可能性は？</h2>
+  <p class="lead">通期予想を上振れする材料と、その蓋然性を検討します。</p>
+
+  <div class="grid2" style="margin-top:8px">
+    <div style="border:1px solid #a7f3d0;border-radius:12px;padding:18px 20px">
+      <h4 style="color:var(--nec);margin-bottom:10px">NEC ─ 上振れ要因</h4>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-g">確度 高</span><br>
+        <b style="font-size:.88rem">Q4のテレコム構造改革の反動増</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">Q3に180億円を一括計上。Q4は費用なし→利益が上振れしやすい構造。</span>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-g">確度 高</span><br>
+        <b style="font-size:.88rem">ANS（防衛）の年度末需要</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">防衛省の予算消化がQ4に集中。前年比+25%の成長が加速する可能性。</span>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-a">確度 中</span><br>
+        <b style="font-size:.88rem">BluStellar大型案件の期ズレ</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">エンタープライズ受注+15%が売上に変換されるタイミング次第。</span>
+      </div>
+
+      <div>
+        <span class="pill pill-a">確度 中</span><br>
+        <b style="font-size:.88rem">自社株買い発表</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">4月の通期決算時に株主還元策として発表される可能性。EPS押し上げ効果あり。</span>
+      </div>
+    </div>
+
+    <div style="border:1px solid #fca5a5;border-radius:12px;padding:18px 20px">
+      <h4 style="color:var(--fujitsu);margin-bottom:10px">富士通 ─ 上振れ要因</h4>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-g">確度 高</span><br>
+        <b style="font-size:.88rem">純利益の大幅上振れ</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">進捗率81%で残りQ4に814億しか必要ない。前年Q4並みなら通期予想を1,000億円以上上回る可能性。</span>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-g">確度 高</span><br>
+        <b style="font-size:.88rem">サービスソリューション利益率の改善持続</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">3Q累計で13.0%と過去最高。通期目標15.5%の達成に向けてQ4はさらに改善の余地。</span>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <span class="pill pill-a">確度 中</span><br>
+        <b style="font-size:.88rem">3年間総還元6,000億円計画の仕上げ</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">26/3期は3年計画の最終年。残り枠を使い切る追加自社株買いの可能性。</span>
+      </div>
+
+      <div>
+        <span class="pill pill-r">確度 低</span><br>
+        <b style="font-size:.88rem">為替の追い風</b><br>
+        <span style="font-size:.82rem;color:var(--sub)">海外売上比率は限定的（約35%）。大きなインパクトにはならない。</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-box" style="max-height:300px;margin-top:20px">
+    <canvas id="chartUpside"></canvas>
+  </div>
+</section>
+
+<!-- ━━ ⑦ 株主還元比較 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--al);color:#92400e">💰</span> 株主還元 ─ 配当・自社株買い比較</h2>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>項目</th><th>NEC</th><th>富士通</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>配当予想（年間）</td>
+          <td>32円<br><span style="font-size:.72rem;color:var(--sub)">（分割後、実質増配）</span></td>
+          <td>30円<br><span style="font-size:.72rem;color:var(--sub)">（9期連続増配）</span></td>
+        </tr>
+        <tr>
+          <td>配当利回り</td>
+          <td>0.8%</td>
+          <td>1.4%</td>
+        </tr>
+        <tr>
+          <td>自社株買い</td>
+          <td>─（4月発表に期待）</td>
+          <td>3年で6,000億円計画<br><span style="font-size:.72rem;color:var(--sub)">（前年度は1,800億円実施）</span></td>
+        </tr>
+        <tr>
+          <td>総還元性向</td>
+          <td>─</td>
+          <td>102%（前年度）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip">
+    <b>株主還元は富士通が圧倒的に手厚い。</b>
+    3年6,000億円の総還元計画、9期連続増配、総還元性向100%超。
+    NECは配当こそ増配基調だが、自社株買いの積極性では見劣り。
+    ただし、NECは今後の通期決算発表（4月下旬）で自社株買いを発表する可能性がある。
+  </div>
+</section>
+
+<!-- ━━ ⑧ バリュエーション比較 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--pl);color:var(--primary)">⚖</span> バリュエーション比較</h2>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>指標</th><th>NEC</th><th>富士通</th><th>判定</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PER（実績）</td>
+          <td>22.7倍</td><td>22.7倍</td>
+          <td><span class="pill pill-b">同水準</span></td>
+        </tr>
+        <tr>
+          <td>PER（予想）</td>
+          <td class="g">5.6倍</td><td>24.4倍</td>
+          <td><span class="pill pill-g">NEC圧倒的割安</span></td>
+        </tr>
+        <tr>
+          <td>PBR</td>
+          <td>2.58倍</td><td>3.25倍</td>
+          <td><span class="pill pill-g">NEC割安</span></td>
+        </tr>
+        <tr>
+          <td>目標株価（平均）</td>
+          <td>6,479円<br><span style="font-size:.72rem">(+62%)</span></td>
+          <td>4,962円<br><span style="font-size:.72rem">(+34%)</span></td>
+          <td><span class="pill pill-g">NEC上昇余地大</span></td>
+        </tr>
+        <tr>
+          <td>アナリスト評価</td>
+          <td>Buy（1.58）</td><td>Buy（1.58）</td>
+          <td><span class="pill pill-b">同水準</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip tip-p">
+    <b>NEC 予想PER 5.6倍のカラクリ：</b><br>
+    yfinanceのforwardEPS 719円は、アナリスト予想の来期EPSを反映している可能性があり、
+    構造改革費用180億円の反動増や利益成長を織り込んだ数値です。
+    実績PER22.7倍との乖離が大きい場合、市場が来期の大幅増益をまだ十分に織り込んでいないことを意味し、
+    <b>業績が実際にその水準で着地すれば株価の見直し余地は大きい</b>。
+    ただし、予想EPSの出典にはばらつきがあるため過信は禁物です。
+  </div>
+</section>
+
+<!-- ━━ ⑨ 総合判定 ━━ -->
+<section class="card">
+  <h2><span class="ic" style="background:var(--gl);color:#065f46">✅</span> 総合判定</h2>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>評価項目</th><th>NEC</th><th>富士通</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>通期達成確率</td><td class="g">90%以上</td><td class="g">95%以上</td></tr>
+        <tr><td>さらなる上振れ</td><td class="g">あり得る</td><td class="g">純利益は大幅上振れ濃厚</td></tr>
+        <tr><td>利益の質</td><td class="g">本業改善中心で高品質</td><td class="n">一過性利益混入の疑い</td></tr>
+        <tr><td>成長ドライバー</td><td class="g">BluStellar + ANS</td><td class="g">Uvance + モダナイゼーション</td></tr>
+        <tr><td>リスク要因</td><td class="n">ボラティリティの高さ</td><td class="n">来期の純利益反動減</td></tr>
+        <tr><td>株主還元</td><td>これから（4月に期待）</td><td class="g">6,000億計画で手厚い</td></tr>
+        <tr><td>バリュエーション</td><td class="g">割安感が際立つ</td><td>適正〜やや割高</td></tr>
+        <tr><td>短期トレード適性</td><td class="n">高ボラが諸刃の剣</td><td class="g">ボラ適度で扱いやすい</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background:linear-gradient(135deg,#f0f7ff,#e8eefb);border-radius:14px;padding:22px 26px;margin:18px 0">
+    <h3 style="font-size:1rem;color:var(--primary);margin-bottom:10px">決算分析から見た投資判断</h3>
+    <div class="grid2">
+      <div>
+        <p style="font-weight:700;color:var(--nec);margin-bottom:6px">NEC ─ 「決算の質は高いが、市場はまだ評価しきれていない」</p>
+        <ul style="font-size:.84rem;padding-left:1.2em;line-height:1.8">
+          <li>テレコム構造改革180億円は<b>前向きな出費</b>。来期以降のコスト減に直結</li>
+          <li>ANS(防衛)+25%は国策テーマ。中長期の成長ドライバーとして信頼度高い</li>
+          <li>予想PER 5.6倍は「来期の利益ジャンプ」を示唆 → 4月決算がカタリスト</li>
+          <li>決算に不健全な兆候なし。<b>株価急落は「市場のオーバーリアクション」の可能性</b></li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;color:var(--fujitsu);margin-bottom:6px">富士通 ─ 「本業は盤石だが、純利益の質は要注意」</p>
+        <ul style="font-size:.84rem;padding-left:1.2em;line-height:1.8">
+          <li>サービスソリューション利益率13%は<b>構造的な改善</b>。DXシフト成功の証</li>
+          <li>純利益+290%は一過性要因混入の可能性大 → <b>来期の反動減リスク</b></li>
+          <li>3年6,000億円の株主還元は株価の下支え要因</li>
+          <li>ボラが適度（53%）で<b>短期トレードのコントロールがしやすい</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip tip-g">
+    <b>結論：</b><br>
+    <b>決算の質ではNECが優位</b>（本業改善中心、不健全な兆候なし、来期の利益ジャンプ余地）。<br>
+    <b>短期トレードの扱いやすさでは富士通が優位</b>（ボラ適度、株主還元が手厚い、下値が堅い）。<br><br>
+    両社とも通期達成はほぼ確実。<b>上振れ余地は両社ともあるが、性質が異なる：</b><br>
+    ・NEC → 本業の実力値が通期予想を上回る可能性（来期ガイダンスで顕在化）<br>
+    ・富士通 → 今期純利益の上振れ（ただし来期は反動減の恐れ）
+  </div>
+</section>
+
+<footer class="footer">
+  <p>本レポートは公開情報に基づく分析であり、投資助言ではありません。投資判断は必ずご自身の責任で行ってください。</p>
+  <p style="margin-top:4px">Generated on 2026-02-18 ／ Sources: yfinance, TDnet, 各社IR資料, Impress Watch, マイナビニュース</p>
+</footer>
+
+</div>
+
+<!-- ━━ Charts ━━ -->
+<script>
+Chart.defaults.font.family='"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif';
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+const NEC='#10b981',FJ='#ef4444',NECbg='rgba(16,185,129,.15)',FJbg='rgba(239,68,68,.15)';
+
+// 3Q comparison
+new Chart(document.getElementById('chart3Q'),{
+  type:'bar',
+  data:{
+    labels:['売上収益\n(3Q累計)','調整後\n営業利益','営業利益','当期純利益'],
+    datasets:[
+      {label:'NEC',data:[24223,2060,1851,1422],backgroundColor:NECbg,borderColor:NEC,borderWidth:2,borderRadius:6},
+      {label:'富士通',data:[24511,2291,2110,3436],backgroundColor:FJbg,borderColor:FJ,borderWidth:2,borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{title:{display:true,text:'3Q累計業績比較（億円）',font:{size:13,weight:'bold'}}},
+    scales:{y:{title:{display:true,text:'億円'},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}
+  }
+});
+
+// Progress rate
+new Chart(document.getElementById('chartProgress'),{
+  type:'bar',
+  data:{
+    labels:['売上収益','調整後営業利益','当期純利益'],
+    datasets:[
+      {label:'NEC',data:[68.0,60.6,null],backgroundColor:NECbg,borderColor:NEC,borderWidth:2,borderRadius:6},
+      {label:'富士通',data:[69.4,60.3,80.8],backgroundColor:FJbg,borderColor:FJ,borderWidth:2,borderRadius:6}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{
+      title:{display:true,text:'通期予想に対する進捗率（%）─ 75%ラインが「順調」の目安',font:{size:13,weight:'bold'}},
+      annotation:{annotations:{line75:{type:'line',yMin:75,yMax:75,borderColor:'rgba(245,158,11,.6)',borderWidth:2,borderDash:[6,4],
+        label:{display:true,content:'75% ライン',position:'start',font:{size:10},color:'#92400e'}}}}
+    },
+    scales:{y:{min:0,max:100,title:{display:true,text:'%'},grid:{color:'rgba(0,0,0,.04)'}},x:{grid:{display:false}}}
+  }
+});
+
+// Segment
+new Chart(document.getElementById('chartSegment'),{
+  type:'bar',
+  data:{
+    labels:['NEC\nBluStellar','NEC\nANS(防衛)','NEC\n国内IT','富士通\nUvance','富士通\nモダナイゼーション','富士通\nサービス全体'],
+    datasets:[{
+      label:'前年比成長率（%）',
+      data:[25.7,25.3,2.9,53.2,43,6.1],
+      backgroundColor:['rgba(16,185,129,.2)','rgba(16,185,129,.2)','rgba(16,185,129,.2)',
+                       'rgba(239,68,68,.2)','rgba(239,68,68,.2)','rgba(239,68,68,.2)'],
+      borderColor:[NEC,NEC,NEC,FJ,FJ,FJ],
+      borderWidth:2,borderRadius:6
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,indexAxis:'y',
+    plugins:{title:{display:true,text:'成長ドライバーの前年比成長率',font:{size:13,weight:'bold'}},legend:{display:false}},
+    scales:{x:{title:{display:true,text:'%'},grid:{color:'rgba(0,0,0,.04)'}},y:{grid:{display:false}}}
+  }
+});
+
+// Upside potential
+new Chart(document.getElementById('chartUpside'),{
+  type:'radar',
+  data:{
+    labels:['Q4売上の\n達成余裕度','営業利益\n上振れ余地','純利益\n上振れ余地','成長ドライバー\nの勢い','株主還元\nの手厚さ','バリュエーション\n割安度'],
+    datasets:[
+      {label:'NEC',data:[7,8,7,8,5,9],borderColor:NEC,backgroundColor:'rgba(16,185,129,.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:NEC},
+      {label:'富士通',data:[8,7,9,9,9,5],borderColor:FJ,backgroundColor:'rgba(239,68,68,.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:FJ}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{title:{display:true,text:'上振れポテンシャル比較（10段階）',font:{size:13,weight:'bold'}}},
+    scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:9}},pointLabels:{font:{size:10}}}}
+  }
+});
+</script>
+</body>
+</html>
