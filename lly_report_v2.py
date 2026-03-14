@@ -338,21 +338,21 @@ fig2.add_hrect(y0=-0.2, y1=0.2, fillcolor='rgba(68,255,136,0.08)',
                annotation_text='割安', annotation_font_color='#44ff88',
                annotation_position='right')
 
-# SMA200フィルター：%Bパネルの下端にカラーバーとして表示
+# SMA200フィルター：%Bパネルの下端に色付きドットで表示
 sma200_aligned = sma200.reindex(per_plot.index, method='ffill')
 close_aligned  = close.reindex(per_plot.index, method='ffill')
 above_sma200   = close_aligned > sma200_aligned
 above_now      = bool(close.iloc[-1] > sma200.iloc[-1])
 
-bar_colors = ['rgba(0,255,136,0.5)' if v else 'rgba(255,68,68,0.5)'
+dot_colors = ['rgba(0,255,136,0.8)' if v else 'rgba(255,68,68,0.8)'
               for v in above_sma200]
-fig2.add_trace(go.Bar(
+fig2.add_trace(go.Scatter(
     x=list(per_plot.index),
-    y=[-0.04] * len(per_plot),
-    base=[-0.18] * len(per_plot),
-    marker_color=bar_colors,
+    y=[-0.17] * len(per_plot),
+    mode='markers',
+    marker=dict(symbol='square', size=4, color=dot_colors),
     showlegend=True,
-    name=f'SMA200：{"上✓ 買い有効" if above_now else "下✗ 買い無効"}（緑=上/赤=下）',
+    name=f'SMA200 現在{"上✓" if above_now else "下✗"}（緑=上/赤=下）',
     hoverinfo='skip',
 ), row=2, col=1)
 
