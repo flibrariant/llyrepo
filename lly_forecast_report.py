@@ -348,48 +348,57 @@ fig2.update_xaxes(gridcolor='#1e1e30', tickformat='$,.0f', title_text='株価 (U
 fig2.update_yaxes(gridcolor='#1e1e30', title_text='確率密度', row=1, col=1)
 fig2.update_yaxes(gridcolor='#1e1e30', title_text='本数', row=2, col=1)
 
-# ─── チャート③ 出来高 + 機関投資家フロー代理（OBV） ─────
+# ─── チャート③ 出来高（独立図） ──────────────────────────
 obv = (np.sign(close.diff()) * volume).fillna(0).cumsum()
-
-fig3 = make_subplots(
-    rows=2, cols=1, shared_xaxes=True,
-    row_heights=[0.55, 0.45], vertical_spacing=0.06,
-    subplot_titles=('出来高', 'OBV（On-Balance Volume）— 需給トレンド')
-)
-vol_colors = list(np.where(close >= close.shift(1), '#00d4ff', '#ff4444'))
-fig3.add_trace(go.Bar(
-    x=list(price_df.index), y=list(volume), marker_color=vol_colors,
-    name='出来高', showlegend=False,
-    hovertemplate='%{y:,.0f}<extra></extra>'
-), row=1, col=1)
-fig3.add_trace(go.Scatter(
-    x=list(obv.index), y=list(obv),
-    name='OBV', line=dict(color='#00ff88', width=2),
-    hovertemplate='OBV: %{y:,.0f}<extra></extra>'
-), row=2, col=1)
-
-# OBV移動平均
 obv_ma20 = obv.rolling(20).mean()
-fig3.add_trace(go.Scatter(
-    x=list(obv_ma20.index), y=list(obv_ma20),
-    name='OBV MA20', line=dict(color='#ffd700', width=1.5, dash='dash')
-), row=2, col=1)
 
+vol_colors = [str(c) for c in np.where(close >= close.shift(1), '#00d4ff', '#ff4444')]
+fig3 = go.Figure()
+fig3.add_trace(go.Bar(
+    x=list(price_df.index),
+    y=[float(v) for v in volume],
+    marker_color=vol_colors,
+    name='出来高',
+    hovertemplate='%{y:,.0f}<extra></extra>'
+))
 fig3.update_layout(
-    height=480,
+    title=dict(text='出来高', font=dict(color='white', size=15)),
+    height=260,
     paper_bgcolor='#0a0a1a', plot_bgcolor='#0a0a1a',
     font=dict(color='white', family='Arial'),
-    legend=dict(orientation='h', y=1.03, bgcolor='rgba(0,0,0,0)'),
-    margin=dict(l=70, r=20, t=40, b=20),
+    showlegend=False,
+    margin=dict(l=70, r=20, t=40, b=30),
+    xaxis=dict(gridcolor='#1e1e30'),
+    yaxis=dict(gridcolor='#1e1e30', title='出来高'),
 )
-for r in range(1, 3):
-    fig3.update_xaxes(gridcolor='#1e1e30', row=r, col=1)
-    fig3.update_yaxes(gridcolor='#1e1e30', row=r, col=1)
+
+# ─── チャート④ OBV（独立図） ─────────────────────────────
+fig4 = go.Figure()
+fig4.add_trace(go.Scatter(
+    x=list(obv.index), y=[float(v) for v in obv],
+    name='OBV', line=dict(color='#00ff88', width=2),
+    hovertemplate='OBV: %{y:,.0f}<extra></extra>'
+))
+fig4.add_trace(go.Scatter(
+    x=list(obv_ma20.index), y=[float(v) for v in obv_ma20],
+    name='OBV MA20', line=dict(color='#ffd700', width=1.5, dash='dash')
+))
+fig4.update_layout(
+    title=dict(text='OBV（On-Balance Volume）— 需給トレンド', font=dict(color='white', size=15)),
+    height=280,
+    paper_bgcolor='#0a0a1a', plot_bgcolor='#0a0a1a',
+    font=dict(color='white', family='Arial'),
+    legend=dict(orientation='h', y=1.1, bgcolor='rgba(0,0,0,0)'),
+    margin=dict(l=70, r=20, t=50, b=30),
+    xaxis=dict(gridcolor='#1e1e30'),
+    yaxis=dict(gridcolor='#1e1e30', title='OBV'),
+)
 
 # ─── HTML 生成 ────────────────────────────────────────
 chart1_html = fig1.to_html(full_html=False, include_plotlyjs=False, div_id='chart-price')
 chart2_html = fig2.to_html(full_html=False, include_plotlyjs=False, div_id='chart-dist')
-chart3_html = fig3.to_html(full_html=False, include_plotlyjs=False, div_id='chart-obv')
+chart3_html = fig3.to_html(full_html=False, include_plotlyjs=False, div_id='chart-vol')
+chart4_html = fig4.to_html(full_html=False, include_plotlyjs=False, div_id='chart-obv')
 
 # 機関投資家テーブル
 inst_rows = ''
@@ -643,6 +652,7 @@ body{{background:var(--bg);color:var(--tx);font-family:Arial,sans-serif}}
     <div class="ct">出来高トレンド &amp; OBV（On-Balance Volume）</div>
     <div class="cd">OBVは上昇日の出来高を累積加算・下落日を減算。上昇トレンド＝機関投資家の買い集め示唆。</div>
     {chart3_html}
+    {chart4_html}
     <div class="ib">
       <strong>OBVリーディング</strong>：OBVが{'上昇' if obv.iloc[-1] > obv.iloc[-20] else '下落'}トレンド。
       {'OBV > MA20 → 買い需要が優勢。株価の上昇継続を示唆。' if obv.iloc[-1] > obv_ma20.iloc[-1] else 'OBV < MA20 → 売り圧力継続。短期的に慎重が必要。'}
