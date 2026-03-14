@@ -112,23 +112,35 @@ def build_ttm_eps_series(close_index, eps_q, annual_eps_dict):
     """
     result = {}
 
+    ann_dates_sorted = sorted(annual_eps_dict.keys()) if annual_eps_dict else []
+
     for date in close_index:
         # 四半期データから TTM を計算できるか試みる
         past_q = eps_q[eps_q.index <= date]
         if len(past_q) >= 4:
-            ttm = past_q.iloc[-4:].sum()
-            if ttm > 0:
-                result[date] = ttm
-                continue
+            last_4 = past_q.iloc[-4:]
+            valid_count = last_4.notna().sum()
+            if valid_count >= 3:          # NaN欠損が1つまでなら四半期TTMを使用
+                ttm = last_4.sum()        # pandas sum はNaNをスキップ
+                if ttm > 0:
+                    result[date] = ttm
+                    continue
 
-        # 四半期データが足りない場合、年次データから補間
-        if annual_eps_dict:
-            ann_dates = sorted(annual_eps_dict.keys())
-            # 直近の年次EPS期末日より前の日付
-            past_ann = [d for d in ann_dates if d <= date + pd.Timedelta(days=180)]
-            if past_ann:
-                latest_ann_date = max(past_ann)
-                ttm = annual_eps_dict[latest_ann_date]
+        # 四半期データが足りない場合、年次EPS間を線形補間
+        if len(ann_dates_sorted) >= 2:
+            # dateを挟む2つの年次日付を探す
+            prev_dates = [d for d in ann_dates_sorted if d <= date]
+            next_dates = [d for d in ann_dates_sorted if d >  date]
+            if prev_dates and next_dates:
+                d0, d1 = max(prev_dates), min(next_dates)
+                e0, e1 = annual_eps_dict[d0], annual_eps_dict[d1]
+                ratio = (date - d0).days / max((d1 - d0).days, 1)
+                ttm = e0 + (e1 - e0) * ratio
+                if ttm > 0:
+                    result[date] = ttm
+                    continue
+            elif prev_dates:
+                ttm = annual_eps_dict[max(prev_dates)]
                 if ttm > 0:
                     result[date] = ttm
 
