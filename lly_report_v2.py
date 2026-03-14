@@ -338,31 +338,29 @@ fig2.add_hrect(y0=-0.2, y1=0.2, fillcolor='rgba(68,255,136,0.08)',
                annotation_text='割安', annotation_font_color='#44ff88',
                annotation_position='right')
 
-# SMA200フィルター：%Bパネルの下端に色付きドットで表示
-sma200_aligned = sma200.reindex(per_plot.index, method='ffill')
-close_aligned  = close.reindex(per_plot.index, method='ffill')
-above_sma200   = close_aligned > sma200_aligned
-above_now      = bool(close.iloc[-1] > sma200.iloc[-1])
+# SMA200フィルター：アノテーションで現在状態を表示（トレース追加なし）
+above_now = bool(close.iloc[-1] > sma200.iloc[-1])
+sma200_label = '▲ SMA200上（買いシグナル有効）' if above_now else '▼ SMA200下（買いシグナル無効）'
+sma200_color = '#00ff88' if above_now else '#ff4444'
+fig2.add_annotation(
+    x=per_plot.index[-1], y=0.5,
+    text=sma200_label,
+    showarrow=False,
+    font=dict(color=sma200_color, size=11),
+    bgcolor='rgba(0,0,0,0.5)',
+    bordercolor=sma200_color, borderwidth=1,
+    xanchor='right', yanchor='middle',
+    row=2, col=1
+)
 
-dot_colors = ['rgba(0,255,136,0.8)' if v else 'rgba(255,68,68,0.8)'
-              for v in above_sma200]
-fig2.add_trace(go.Scatter(
-    x=list(per_plot.index),
-    y=[-0.17] * len(per_plot),
-    mode='markers',
-    marker=dict(symbol='square', size=4, color=dot_colors),
-    showlegend=True,
-    name=f'SMA200 現在{"上✓" if above_now else "下✗"}（緑=上/赤=下）',
-    hoverinfo='skip',
-), row=2, col=1)
-
-# Y軸を明示的に設定
-per_y_min = max(0, per_plot[['per', 'lower']].min().min() * 0.90)
-per_y_max = per_plot[['per', 'upper']].max().max() * 1.08
+# Y軸：直近値周辺にクリップしてBBバンドが見えるようにする
+recent_per = per_plot['per'].iloc[-126:]  # 直近6ヶ月
+per_y_min = max(0, recent_per.min() * 0.85)
+per_y_max = recent_per.max() * 1.15
 fig2.update_yaxes(range=[per_y_min, per_y_max],
                   tickformat='.0f', ticksuffix='x', title_text='PER',
                   row=1, col=1)
-fig2.update_yaxes(range=[-0.22, 1.3],
+fig2.update_yaxes(range=[-0.15, 1.3],
                   tickformat='.1f', title_text='%B',
                   row=2, col=1)
 
