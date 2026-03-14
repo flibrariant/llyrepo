@@ -338,35 +338,22 @@ fig2.add_hrect(y0=-0.2, y1=0.2, fillcolor='rgba(68,255,136,0.08)',
                annotation_text='割安', annotation_font_color='#44ff88',
                annotation_position='right')
 
-# SMA200フィルター：価格がSMA200を下回る期間を赤背景で表示
+# SMA200フィルター：%Bパネルの下端にカラーバーとして表示
 sma200_aligned = sma200.reindex(per_plot.index, method='ffill')
 close_aligned  = close.reindex(per_plot.index, method='ffill')
 above_sma200   = close_aligned > sma200_aligned
+above_now      = bool(close.iloc[-1] > sma200.iloc[-1])
 
-in_below  = False
-seg_start = None
-for date, above in above_sma200.items():
-    if not above and not in_below:
-        in_below  = True
-        seg_start = date
-    elif above and in_below:
-        in_below = False
-        fig2.add_vrect(x0=seg_start, x1=date,
-                       fillcolor='rgba(255,68,68,0.12)', line_width=0,
-                       row=2, col=1)
-if in_below:
-    fig2.add_vrect(x0=seg_start, x1=per_plot.index[-1],
-                   fillcolor='rgba(255,68,68,0.12)', line_width=0,
-                   row=2, col=1)
-
-# SMA200条件のダミートレース（凡例用）
-above_now = bool(close.iloc[-1] > sma200.iloc[-1])
-fig2.add_trace(go.Scatter(
-    x=[None], y=[None],
-    mode='markers',
-    marker=dict(color='rgba(255,68,68,0.5)', size=10, symbol='square'),
-    name=f'SMA200下（買い無効） 現在:{"上✓" if above_now else "下✗"}',
-    showlegend=True
+bar_colors = ['rgba(0,255,136,0.5)' if v else 'rgba(255,68,68,0.5)'
+              for v in above_sma200]
+fig2.add_trace(go.Bar(
+    x=list(per_plot.index),
+    y=[-0.04] * len(per_plot),
+    base=[-0.18] * len(per_plot),
+    marker_color=bar_colors,
+    showlegend=True,
+    name=f'SMA200：{"上✓ 買い有効" if above_now else "下✗ 買い無効"}（緑=上/赤=下）',
+    hoverinfo='skip',
 ), row=2, col=1)
 
 # Y軸を明示的に設定
@@ -375,7 +362,7 @@ per_y_max = per_plot[['per', 'upper']].max().max() * 1.08
 fig2.update_yaxes(range=[per_y_min, per_y_max],
                   tickformat='.0f', ticksuffix='x', title_text='PER',
                   row=1, col=1)
-fig2.update_yaxes(range=[-0.15, 1.3],
+fig2.update_yaxes(range=[-0.22, 1.3],
                   tickformat='.1f', title_text='%B',
                   row=2, col=1)
 
