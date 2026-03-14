@@ -223,9 +223,9 @@ band_95 = np.percentile(paths[:, 1:], 95, axis=0)
 fig1 = go.Figure()
 
 # SMA（先に描いて背面に）
-fig1.add_trace(go.Scatter(x=sma50.index, y=sma50,
+fig1.add_trace(go.Scatter(x=list(sma50.index), y=list(sma50),
     name='SMA50', line=dict(color='#ff9944', width=1.2, dash='dash'), opacity=0.7))
-fig1.add_trace(go.Scatter(x=sma200.index, y=sma200,
+fig1.add_trace(go.Scatter(x=list(sma200.index), y=list(sma200),
     name='SMA200', line=dict(color='#ff4444', width=1.2, dash='dot'), opacity=0.7))
 
 # 将来バンド（90%〜10%）
@@ -363,7 +363,7 @@ fig3.add_trace(go.Bar(
     hovertemplate='%{y:,.0f}<extra></extra>'
 ), row=1, col=1)
 fig3.add_trace(go.Scatter(
-    x=obv.index, y=obv,
+    x=list(obv.index), y=list(obv),
     name='OBV', line=dict(color='#00ff88', width=2),
     hovertemplate='OBV: %{y:,.0f}<extra></extra>'
 ), row=2, col=1)
@@ -371,7 +371,7 @@ fig3.add_trace(go.Scatter(
 # OBV移動平均
 obv_ma20 = obv.rolling(20).mean()
 fig3.add_trace(go.Scatter(
-    x=obv_ma20.index, y=obv_ma20,
+    x=list(obv_ma20.index), y=list(obv_ma20),
     name='OBV MA20', line=dict(color='#ffd700', width=1.5, dash='dash')
 ), row=2, col=1)
 
