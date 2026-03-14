@@ -244,8 +244,8 @@ fig1.add_trace(go.Scatter(
 
 # 中央値ライン
 fig1.add_trace(go.Scatter(
-    x=future_dates, y=band_50,
-    name=f'予測中央値 (${pct_50:.0f})', line=dict(color='#00d4ff', width=2, dash='dot')
+    x=list(future_dates), y=list(band_50),
+    name=f'予測中央値 (${pct_50:.0f})', line=dict(color='#ff6b35', width=2.5, dash='dot')
 ))
 
 # アナリスト目標株価ライン
@@ -277,7 +277,7 @@ for rs in resistances[:3]:
 
 # 実績株価（最前面に描く）
 fig1.add_trace(go.Scatter(
-    x=dates_hist, y=close,
+    x=list(dates_hist), y=list(close),
     name='実績株価', line=dict(color='#00ffff', width=3),
     hovertemplate='$%{y:.2f}<extra></extra>'
 ))
@@ -301,44 +301,52 @@ sigma = (target_high - target_low) / 4  # 概算
 mu = target_mean
 dist = np.exp(-0.5 * ((x_range - mu) / sigma) ** 2) / (sigma * np.sqrt(2 * np.pi))
 
-fig2 = go.Figure()
+fig2 = make_subplots(
+    rows=2, cols=1, shared_xaxes=True,
+    row_heights=[0.45, 0.55], vertical_spacing=0.06,
+    subplot_titles=('アナリスト目標分布（近似）', 'モンテカルロ 1年後分布（2,000本）')
+)
+
+# 上段: アナリスト分布曲線
 fig2.add_trace(go.Scatter(
-    x=x_range, y=dist,
+    x=list(x_range), y=list(dist),
     fill='tozeroy', fillcolor='rgba(0,212,255,0.15)',
     line=dict(color='#00d4ff', width=2),
     name='アナリスト目標分布（近似）'
-))
-fig2.add_vline(x=cur_price, line=dict(color='white', width=2),
-               annotation_text=f'現在値 ${cur_price:.0f}',
-               annotation_font_color='white', annotation_position='top right')
-fig2.add_vline(x=target_mean, line=dict(color='#ffd700', width=2, dash='dash'),
-               annotation_text=f'平均目標 ${target_mean:.0f}',
-               annotation_font_color='#ffd700', annotation_position='top left')
-fig2.add_vline(x=target_med, line=dict(color='#00ff88', width=1.5, dash='dot'),
-               annotation_text=f'中央値 ${target_med:.0f}',
-               annotation_font_color='#00ff88', annotation_position='bottom right')
+), row=1, col=1)
 
-# モンテカルロの1年後分布（ヒストグラム）
+# 下段: モンテカルロ1年後ヒストグラム
 fig2.add_trace(go.Histogram(
-    x=paths[:, -1],
+    x=list(paths[:, -1]),
     nbinsx=60, name='モンテカルロ1年後分布',
-    marker_color='rgba(255,107,53,0.4)',
-    yaxis='y2', opacity=0.7
-))
+    marker_color='rgba(255,107,53,0.5)',
+    opacity=0.8
+), row=2, col=1)
+
+# 縦線（両行に追加）
+for row in [1, 2]:
+    fig2.add_vline(x=cur_price, line=dict(color='white', width=2),
+                   annotation_text=f'現在値 ${cur_price:.0f}' if row == 1 else '',
+                   annotation_font_color='white', annotation_position='top right')
+    fig2.add_vline(x=target_mean, line=dict(color='#ffd700', width=1.5, dash='dash'),
+                   annotation_text=f'平均目標 ${target_mean:.0f}' if row == 1 else '',
+                   annotation_font_color='#ffd700', annotation_position='top left')
+    fig2.add_vline(x=target_med, line=dict(color='#00ff88', width=1, dash='dot'),
+                   annotation_text=f'中央値 ${target_med:.0f}' if row == 1 else '',
+                   annotation_font_color='#00ff88', annotation_position='bottom right')
 
 fig2.update_layout(
     title=dict(text='アナリスト目標株価 & モンテカルロ1年後分布', font=dict(color='white', size=16)),
-    height=380,
+    height=480,
     paper_bgcolor='#0a0a1a', plot_bgcolor='#0a0a1a',
     font=dict(color='white', family='Arial'),
-    legend=dict(orientation='h', y=-0.18, bgcolor='rgba(0,0,0,0)'),
-    margin=dict(l=70, r=70, t=60, b=70),
-    xaxis=dict(gridcolor='#1e1e30', tickformat='$,.0f', title='株価 (USD)'),
-    yaxis=dict(gridcolor='#1e1e30', title='確率密度'),
-    yaxis2=dict(overlaying='y', side='right', title='シミュレーション本数',
-                gridcolor='rgba(0,0,0,0)'),
-    barmode='overlay'
+    legend=dict(orientation='h', y=-0.1, bgcolor='rgba(0,0,0,0)'),
+    margin=dict(l=70, r=30, t=60, b=60),
+    showlegend=True
 )
+fig2.update_xaxes(gridcolor='#1e1e30', tickformat='$,.0f', title_text='株価 (USD)', row=2, col=1)
+fig2.update_yaxes(gridcolor='#1e1e30', title_text='確率密度', row=1, col=1)
+fig2.update_yaxes(gridcolor='#1e1e30', title_text='本数', row=2, col=1)
 
 # ─── チャート③ 出来高 + 機関投資家フロー代理（OBV） ─────
 obv = (np.sign(close.diff()) * volume).fillna(0).cumsum()
@@ -348,9 +356,9 @@ fig3 = make_subplots(
     row_heights=[0.55, 0.45], vertical_spacing=0.06,
     subplot_titles=('出来高', 'OBV（On-Balance Volume）— 需給トレンド')
 )
-vol_colors = np.where(close >= close.shift(1), '#00d4ff', '#ff4444')
+vol_colors = list(np.where(close >= close.shift(1), '#00d4ff', '#ff4444'))
 fig3.add_trace(go.Bar(
-    x=price_df.index, y=volume, marker_color=vol_colors,
+    x=list(price_df.index), y=list(volume), marker_color=vol_colors,
     name='出来高', showlegend=False,
     hovertemplate='%{y:,.0f}<extra></extra>'
 ), row=1, col=1)
@@ -379,9 +387,9 @@ for r in range(1, 3):
     fig3.update_yaxes(gridcolor='#1e1e30', row=r, col=1)
 
 # ─── HTML 生成 ────────────────────────────────────────
-chart1_html = fig1.to_html(full_html=False, include_plotlyjs=False)
-chart2_html = fig2.to_html(full_html=False, include_plotlyjs=False)
-chart3_html = fig3.to_html(full_html=False, include_plotlyjs=False)
+chart1_html = fig1.to_html(full_html=False, include_plotlyjs=False, div_id='chart-price')
+chart2_html = fig2.to_html(full_html=False, include_plotlyjs=False, div_id='chart-dist')
+chart3_html = fig3.to_html(full_html=False, include_plotlyjs=False, div_id='chart-obv')
 
 # 機関投資家テーブル
 inst_rows = ''
