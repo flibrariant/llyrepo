@@ -277,7 +277,7 @@ fig2 = make_subplots(
     row_heights=[0.72, 0.28],
     vertical_spacing=0.06,
     subplot_titles=(f'PER ボリンジャーバンド（{bb_win}日移動平均, ±2σ）',
-                    '%B（BBバンド内の位置） ／ 赤背景＝SMA200下（買いシグナル無効）')
+                    '%B（BBバンド内の位置）')
 )
 
 # バンド塗りつぶし（上限→下限の間を塗る）
@@ -338,25 +338,9 @@ fig2.add_hrect(y0=-0.2, y1=0.2, fillcolor='rgba(68,255,136,0.08)',
                annotation_text='割安', annotation_font_color='#44ff88',
                annotation_position='right')
 
-# SMA200フィルター：アノテーションで現在状態を表示（トレース追加なし）
-above_now = bool(close.iloc[-1] > sma200.iloc[-1])
-sma200_label = '▲ SMA200上（買いシグナル有効）' if above_now else '▼ SMA200下（買いシグナル無効）'
-sma200_color = '#00ff88' if above_now else '#ff4444'
-fig2.add_annotation(
-    x=per_plot.index[-1], y=0.5,
-    text=sma200_label,
-    showarrow=False,
-    font=dict(color=sma200_color, size=11),
-    bgcolor='rgba(0,0,0,0.5)',
-    bordercolor=sma200_color, borderwidth=1,
-    xanchor='right', yanchor='middle',
-    row=2, col=1
-)
-
-# Y軸：直近値周辺にクリップしてBBバンドが見えるようにする
-recent_per = per_plot['per'].iloc[-126:]  # 直近6ヶ月
-per_y_min = max(0, recent_per.min() * 0.85)
-per_y_max = recent_per.max() * 1.15
+# Y軸を明示的に設定
+per_y_min = max(0, per_plot[['per', 'lower']].min().min() * 0.90)
+per_y_max = per_plot[['per', 'upper']].max().max() * 1.08
 fig2.update_yaxes(range=[per_y_min, per_y_max],
                   tickformat='.0f', ticksuffix='x', title_text='PER',
                   row=1, col=1)
